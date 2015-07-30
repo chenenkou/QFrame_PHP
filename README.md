@@ -2,7 +2,7 @@
 
 框架目录说明
 Frame/
-  ├── Common/ 公共函数目录
+  ├── Common/ 公共函数目录\n
   ├── Component/ 业务相关的类文件目录
   ├── Conf/ 配置文件目录
   ├── Data/ 文件数据目录
