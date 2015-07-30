@@ -1,6 +1,7 @@
 # QFrame小型PHP框架
 
 框架目录说明
+```
 Frame/
   ├── Common/ 公共函数目录
   ├── Component/ 业务相关的类文件目录
@@ -11,3 +12,4 @@ Frame/
   ├── Log/ 日志目录
   ├── Model/ 数据库模型目录
   └── Core.inc.php 需要引入的核心文件
+```
