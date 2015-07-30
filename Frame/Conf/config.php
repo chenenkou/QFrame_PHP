@@ -1,5 +1,9 @@
 <?php
 	return array(
+        'AUTOLOAD_CLASS_DIRS' => array(
+            'Lib',
+            'Component'
+        ),
         'DB_CHARSET' =>'utf8',
 		/* 数据库置0 */
 		'DB_CONFIG0' => array(

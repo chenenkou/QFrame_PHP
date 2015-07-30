@@ -1,8 +1,7 @@
 # QFrame小型PHP框架
-框架最后修改日期0500730
 
 框架目录说明
-QFrame/
+Frame/
   ├── Common/ 公共函数目录
   ├── Conf/ 配置文件目录
   ├── Data/ 文件数据目录
