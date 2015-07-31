@@ -1,5 +1,6 @@
 <?php
 	return array(
+        /* 自动载入的类的目录 */
         'AUTOLOAD_CLASS_DIRS' => array(
             'Lib',
             'Component'
@@ -13,12 +14,14 @@
 			'db_port'  => '3306',
 			'db_name'  => 'test'
 		),
+        /* 邮件发送者的配置 */
 		'MAIL_CONFIG' => array(
             'host' => 'smtp.163.com',
             'username' => '',
             'password' => '',
             'fromname' => '',
         ),
+        /* 邮件默认接收者的配置 */
         'MAIL_SEND_TO' => '',
 	);
 ?>
