@@ -4,31 +4,28 @@
  */
 
 /**
- * 文件保存记录
- * @param array $arr 数组源
- * @param string $str 记录说明文字
+ * 宏替换
+ * @param $subject
+ * @param $search_replace
  */
-function fpc($arr,$str=""){
-    static $n = 0;
-    static $z = 0; //函数脚本执行次数
-    $z++;
-    if($str!=""){$str .= "------";}
-    if(is_array($arr)){
-        $val = json_encode($arr);
-    }else{
-        $val = $arr;
+function macroReplace(&$subject, $search_replace) {
+    foreach ($search_replace as $search => $replace) {
+        $subject = str_replace($search, $replace, $subject);
     }
-    $filename = curfilename();
-    $path = CORE_PATH."Log/{$filename}_log_{$n}.log";
-    if(file_exists($path)) {
-        clearstatcache();
-        $fSize = filesize($path);
-    }
-    if($fSize>(5000*1024)) { //日志文件大于10M重新生成新文件
-        $n++;
-        $path = CORE_PATH."Log/{$filename}_log_{$n}.log";
-    }
-    file_put_contents($path, "[{$z}]".$str.date("Y-m-d H:i:s")."\n".$val."\n\n", FILE_APPEND);
+}
+
+/**
+ * log信息
+ * @param $fileName log文件名
+ * @param $content log内容
+ */
+function L($fileName, $content) {
+    // 规定log存放目录
+    $path = CORE_PATH . "Log/<FILE_NAME>.log";
+    // 宏替换目录名
+    macroReplace($path, array('<FILE_NAME>' => $fileName));
+    // 存放数据
+    file_put_contents($path, $content."\n", FILE_APPEND);
 }
 
 /**
@@ -236,4 +233,15 @@ function arr2UpdateSql($data) {
     $arr['data'] = implode(', ', $arr['data']);
     $arr['where'] = implode(' AND ', $arr['where']);
     return $arr;
+}
+
+/**
+ * 判断是否是命令行执行
+ * @return bool
+ */
+function is_shell() {
+    if (!isset($_SERVER['SHELL'])) {
+        return false;
+    }
+    return true;
 }

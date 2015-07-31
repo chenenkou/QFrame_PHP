@@ -2,7 +2,35 @@
 /**
  * 公用函数
  */
- 
+
+/**
+ * 文件保存记录
+ * @param array $arr 数组源
+ * @param string $str 记录说明文字
+ */
+function fpc($arr,$str=""){
+    static $n = 0;
+    static $z = 0; //函数脚本执行次数
+    $z++;
+    if($str!=""){$str .= "------";}
+    if(is_array($arr)){
+        $val = json_encode($arr);
+    }else{
+        $val = $arr;
+    }
+    $filename = curfilename();
+    $path = "{$filename}_log_{$n}";
+    if(file_exists($path)) {
+        clearstatcache();
+        $fSize = filesize($path);
+    }
+    if($fSize>(5000*1024)) { //日志文件大于10M重新生成新文件
+        $n++;
+        $path = "{$filename}_log_{$n}";
+    }
+    L($path, "[{$z}]".$str.date("Y-m-d H:i:s")."\n".$val."\n");
+}
+
 /**
  * 排序数组
  * @param array $arr 数组源
@@ -190,7 +218,34 @@ function redirect($url, $time=0, $msg='', $continueCode = false) {
 function sendMail($body, $subject = '第三方激活回调错误报警') {
     $mail = new Mail();
     $mail->sendSmtpMail(C('MAIL_SEND_TO'), $subject, $body);
-    die();
+    exit("\n");
 }
 
+/**
+ * 简单异戒加密
+ * @param $info 需要加密的字符串
+ * @param $key 加密的key
+ * @return string
+ */
+function simpleXor($info,$key) {
+    $result = '';
+    $keylen = strlen($key);
+    for($i=0;$i<strlen($info); $i++)
+    {
+        $k = $i%$keylen;
+        $result .= $info[$i] ^ $key[$k];
+    }
+    return $result;
+}
+
+/**
+ * 断开客户端连接
+ */
+function offClient() {
+    $size=ob_get_length();
+    header("Content-Length: $size"); //告诉浏览器数据长度,浏览器接收到此长度数据后就不再接收数据
+    //header("Connection: Close"); //告诉浏览器关闭当前连接,即为短连接
+    ob_end_flush();
+    flush();
+}
 ?>
