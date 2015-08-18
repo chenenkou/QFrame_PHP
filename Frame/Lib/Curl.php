@@ -25,6 +25,11 @@ class Curl {
      * @var array 需要发送的数据
      */
     private $vars = array();
+
+    /**
+     * @var array 302跳转后的url信息
+     */
+    private $curlInfo = array();
     /**
      * 构造函数
      *
@@ -214,6 +219,37 @@ class Curl {
             throw new Exception(__CLASS__ . " error: " . $err);
         }
         curl_close($ch);
+        $this->curlInfo = $data["curlInfo"];
         return $data['curlRet'];
+    }
+
+    /**
+     * 获取跳转后的url信息
+     * @return array
+     */
+    public function getCurlInfo() {
+        return $this->curlInfo;
+    }
+
+    /**
+     * 远程下载
+     * @param string $remote 远程图片地址
+     * @param string $local 本地保存的地址
+     * @param string $cookie cookie地址 可选参数由
+     * 于某些网站是需要cookie才能下载网站上的图片的
+     * 所以需要加上cookie
+     * @return void
+     */
+    public function reutersload($remote, $local, $cookie= '') {
+        $cp = curl_init($remote);
+        $fp = fopen($local,"w");
+        curl_setopt($cp, CURLOPT_FILE, $fp);
+        curl_setopt($cp, CURLOPT_HEADER, 0);
+        if($cookie != '') {
+            curl_setopt($cp, CURLOPT_COOKIEFILE, $cookie);
+        }
+        curl_exec($cp);
+        curl_close($cp);
+        fclose($fp);
     }
 }
