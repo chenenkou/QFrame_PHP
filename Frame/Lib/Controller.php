@@ -31,7 +31,7 @@ class Controller {
      */
     public function display($filePath = '') {
         if (empty($filePath)) {
-            $request = App::instance()->request;
+            $request = App::i()->request;
             $controller = $request->controller;
             $action = $request->action;
             $filePath = "{$controller}/{$action}";

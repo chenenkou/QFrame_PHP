@@ -5,13 +5,18 @@
  * Class Request
  */
 class Request {
-
+    // 请求的uri
     public $_uri;
+    // 请求脚本的目录
     public $_scriptDir;
+    // 控制器类名
     public $controllerClassName;
+    // 请求的控制器
     public $controller;
+    // 请求的方法
     public $action;
-    public $app_path;
+    // 应用项目基类url
+    public $baseUrl;
 
     /**
      * 构造初始化
@@ -62,7 +67,7 @@ class Request {
         $subject = $this->_uri;
         preg_match($pattern, $subject, $matches);
 
-        $app_path = $matches[1];
+        $baseUrl = $matches[1];
 
         $parseUrl = explode('/', $matches[3]);
 
@@ -75,7 +80,7 @@ class Request {
         $controllerClassName = end($parseUrl) . 'Controller';
         $controller = implode('/', $parseUrl);
 
-        $this->app_path = $app_path;
+        $this->baseUrl = $baseUrl;
         $this->controllerClassName = $controllerClassName;
         $this->controller = $controller;
         $this->action = $action;
