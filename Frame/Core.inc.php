@@ -1,6 +1,6 @@
 <?php
     header("Content-type: text/html; charset=utf-8");
-    define('Q_VERSION', '2.2.150327'); // 版本号
+    define('Q_VERSION', '3.0.150906'); // 版本号
     if (!defined('ROOT')) {
         define('ROOT', dirname(__FILE__) .'/../'); // 根目录常量设置检测
     }
@@ -13,3 +13,6 @@
     require_once(CORE_PATH."Common/functions.php");      // 载入公用函数
     // 部分设置项
     date_default_timezone_set('PRC'); // 设置为中国时区
+
+    // 应用初始化执行
+    $App = App::instance()->run();

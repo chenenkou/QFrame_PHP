@@ -245,3 +245,11 @@ function is_shell() {
     }
     return true;
 }
+
+// 抛出404
+function throw_404() {
+    @header("http/1.1 404 not found"); 
+    @header("status: 404 not found");
+    echo '<center><h1>404 Not Found</h1></center><hr />';
+    exit();
+}
