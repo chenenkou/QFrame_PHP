@@ -128,4 +128,27 @@ class Model {
     public function getLastInsID(){
         return $this->_db->getLastInsID();
     }
+
+    /**
+     * 保存数据
+     * @param $data 需要保存的数据
+     * @param string $table 表名
+     * @return int
+     */
+    public function insert($data, $table='') {
+        // 判断是单条数据还是多条数据
+        if (is_array(end($data))) {
+            list($fields, $values) = doubleArr2InsertSql($data);
+        } else {
+            list($fields, $values) = arr2InsertSql($data);
+            $values = "({$values})";
+        }
+        // 处理需要插入的表名
+        if (empty($table))
+            $table = $this->_db->getTablePrefix() . strtolower(get_class($this));
+
+        // 拼接sql需要插入数据库
+        $sql = "INSERT INTO {$table} ({$fields}) VALUES {$values}";
+        return $this->execute($sql);
+    }
 }

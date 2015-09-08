@@ -6,7 +6,7 @@
  */
 class Request {
     // 请求的uri
-    public $_uri;
+    public $uri;
     // 请求脚本的目录
     public $_scriptDir;
     // 控制器类名
@@ -53,9 +53,9 @@ class Request {
      * 设置uri
      */
     public function setUri() {
-        $this->_uri = $_SERVER['REQUEST_URI'];
-        if ($this->_scriptDir == $this->_uri) {
-            $this->_uri = $_SERVER['SCRIPT_NAME'] . "/Index/index";
+        $this->uri = $_SERVER['REQUEST_URI'];
+        if ($this->_scriptDir == $this->uri) {
+            $this->uri = $_SERVER['SCRIPT_NAME'] . "/Index/index";
         }
     }
 
@@ -64,7 +64,7 @@ class Request {
      */
     public function analysisUri () {
         $pattern = '/^('. str_replace("/", "\/", $this->_scriptDir) .')(index.php\/)?([\w\/]+[\w])[\/]?[\?]?([\w\=\-]*)/';
-        $subject = $this->_uri;
+        $subject = $this->uri;
         preg_match($pattern, $subject, $matches);
 
         $baseUrl = $matches[1];
@@ -105,4 +105,4 @@ class Request {
         }
         $ControllerObject->$action();
     }
-    }
+}

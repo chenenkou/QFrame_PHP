@@ -201,12 +201,29 @@ function arr2InsertSql($data) {
         'values' => array(),
     );
     foreach ($data as $k=>$v) {
-        $arr['fields'][] = $k;
+        $arr['fields'][] = "`{$k}`";
         $arr['values'][] = "'{$v}'";
     }
     $arr['fields'] = implode(', ', $arr['fields']);
     $arr['values'] = implode(', ', $arr['values']);
-    return $arr;
+    return array($arr['fields'], $arr['values']);
+}
+
+/**
+ * 二维数组转变成更新语句中的字符
+ * @param $data
+ * @return array
+ */
+function doubleArr2InsertSql($data) {
+    $fields = array();
+    $values = array();
+    foreach($data as $item) {
+        list($field, $value) = arr2InsertSql($item);
+        if (empty($fields)) $fields = $field;
+        $values[] = $value;
+    }
+    $values = "(" . implode("), (", $values) . ")";
+    return array($fields, $values);
 }
 
 /**
@@ -246,10 +263,43 @@ function is_shell() {
     return true;
 }
 
-// 抛出404
+/**
+ * 抛出404
+ */
 function throw_404() {
-    @header("http/1.1 404 not found"); 
+    @header("http/1.1 404 not found");
     @header("status: 404 not found");
     echo '<center><h1>404 Not Found</h1></center><hr />';
     exit();
+}
+
+/**
+ * 移除URL中的指定GET变量
+ * @param string $var 要移除的GET变量
+ * @param null $url url地址
+ * @return mixed|string 移除GET变量后的URL地址
+ */
+function remove_url_param($var, $url = null) {
+    if (is_null($url))
+        $url = App::i()->request->uri;
+    $url = $url . '&';
+    $url = preg_replace(array("/$var=.*?&/", "/&&/"), '', $url);
+    return rtrim(rtrim($url, "&"), "?");
+}
+
+
+/**
+ * 替换URL中的指定GET变量
+ * @param $param 要替换的GET变量
+ * @param null $uri
+ * @return mixed|null|string
+ */
+function replace_url_param($param, $uri = null) {
+    $paramArr = explode('=', $param);
+    $uri = remove_url_param($paramArr[0], $uri);
+    $separator = "&";
+    if (!strpos($uri, "?"))
+        $separator = '?';
+    $uri .= "{$separator}{$param}";
+    return $uri;
 }

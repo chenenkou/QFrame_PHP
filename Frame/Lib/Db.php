@@ -319,4 +319,13 @@ class Db {
     public function getLastInsID(){
         return $this->lastInsID;
     }
+
+    /**
+     * 获取表前缀
+     * @return string
+     */
+    public function getTablePrefix() {
+        if (!isset($this->config['table_prefix'])) $this->config['table_prefix'] = '';
+        return $this->config['table_prefix'];
+    }
 }
