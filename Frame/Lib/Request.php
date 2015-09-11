@@ -17,6 +17,8 @@ class Request {
     public $action;
     // 应用项目基类url
     public $baseUrl;
+    // 应用项目host
+    public $host;
 
     /**
      * 构造初始化
@@ -57,6 +59,10 @@ class Request {
         if ($this->_scriptDir == $this->uri) {
             $this->uri = $_SERVER['SCRIPT_NAME'] . "/Index/index";
         }
+
+        // 获取服务器host
+        $host = ($_SERVER['REQUEST_SCHEME'] ? $_SERVER['REQUEST_SCHEME'] : "http") . '://' . $_SERVER['HTTP_HOST'] . ':' . $_SERVER['SERVER_PORT'];
+        $this->host = $host;
     }
 
     /**
@@ -94,15 +100,25 @@ class Request {
         $controller = $this->controller;
         $action = $this->action;
 
+        // 检测控制器是否存在
         $controllerFile = CORE_PATH . 'Controller/' . $controller . 'Controller.php';
         if (!file_exists($controllerFile)) {
             throw_404();
         }
         require_once($controllerFile);
+
+        // 检测方法是否存在
         $ControllerObject = new $controllerClassName;
         if (!method_exists($ControllerObject, $action)) {
             throw_404();
         }
+
+        // 检测方法是否为公有方法
+        $method = new ReflectionMethod($controllerClassName, $action);
+        if (!($method->isPublic() && !$method->isStatic())) {
+            throw_404();
+        }
+
         $ControllerObject->$action();
     }
 }

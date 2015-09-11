@@ -147,7 +147,6 @@ class Model {
         if (empty($table))
             $table = $this->_db->getTablePrefix() . strtolower(get_class($this));
 
-        // 拼接sql需要插入数据库
         $sql = "INSERT INTO {$table} ({$fields}) VALUES {$values}";
         return $this->execute($sql);
     }

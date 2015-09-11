@@ -1,24 +1,24 @@
 <?php
 
 /**
- * È«¾ÖAppÀà
+ * å…¨å±€Appç±»
  * Class App
  */
 class App {
-    // Ó¦ÓÃÊµÀý¶ÔÏó
+    // åº”ç”¨å®žä¾‹å¯¹è±¡
     protected static $_instance = null;
-    // ÇëÇó¶ÔÏó
+    // è¯·æ±‚å¯¹è±¡
     public $request;
 
     /**
-     * ¹¹Ôì³õÊ¼»¯
+     * æž„é€ åˆå§‹åŒ–
      */
     protected function __construct() {
         $this->request = new Request();
     }
 
     /**
-     * »ñÈ¡Ó¦ÓÃÊµÌå
+     * èŽ·å–åº”ç”¨å®žä½“
      * @return App|null
      */
     public static function i() {
@@ -30,7 +30,7 @@ class App {
     }
 
     /**
-     * Ó¦ÓÃ³õÊ¼»¯Ö´ÐÐ
+     * åº”ç”¨åˆå§‹åŒ–æ‰§è¡Œ
      */
     public function run() {
         $this->request->parseUri();

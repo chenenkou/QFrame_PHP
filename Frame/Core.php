@@ -1,6 +1,6 @@
 <?php
     header("Content-type: text/html; charset=utf-8");
-    define('Q_VERSION', '3.1.150907'); // 版本号
+    define('Q_VERSION', '3.0.150906'); // 版本号
     if (!defined('ROOT')) {
         define('ROOT', dirname(__FILE__) .'/../'); // 根目录常量设置检测
     }
@@ -9,7 +9,7 @@
     define('DATA_PATH', ROOT. FOLDER_NAME .'/Data/'); // 缓存数据文件夹路径
     define('LIB_PATH', ROOT. FOLDER_NAME .'/Lib/'); // 类库文件夹路径
     define('LOG_PATH', ROOT. FOLDER_NAME .'/Log/'); // 日志文件夹路径
-	define('VIEW_PATH', ROOT. FOLDER_NAME .'/View/'); // 模板文件夹路径
+    define('VIEW_PATH', ROOT. FOLDER_NAME .'/View/'); // 模板文件夹路径
     require_once(CORE_PATH."Common/common.php");      // 载入基础函数
     require_once(CORE_PATH."Common/functions.php");      // 载入公用函数
     // 部分设置项

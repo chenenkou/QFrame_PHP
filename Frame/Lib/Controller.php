@@ -41,4 +41,25 @@ class Controller {
         $this->assignData = array();
         require(CORE_PATH . "View/{$filePath}.php");
     }
+
+    /**
+     * json方式返回数据到客户端
+     * @access protected
+     * @param mixed $data 要返回的数据
+     * @return void
+     */
+    protected function jsonReturn($data) {
+        if(func_num_args()>2) {
+            $args           =   func_get_args();
+            array_shift($args);
+            $info           =   array();
+            $info['data']   =   $data;
+            $info['info']   =   array_shift($args);
+            $info['status'] =   array_shift($args);
+            $data           =   $info;
+        }
+
+        header('Content-Type:application/json; charset=utf-8');
+        exit(json_encode($data));
+    }
 }

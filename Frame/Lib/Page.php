@@ -16,7 +16,7 @@
 			}
 		}
 
-		$this->total = $_total ? $_total : 1;
+		$this->total = $_total ? $_total : 0;
 		$this->pagesize = $_pagesize;
 		$this->pagenum = ceil($this->total / $this->pagesize);
 		$this->page = $this->setPage();
@@ -202,6 +202,7 @@
             'next' => $this->next_num(),
             'page' => $this->page,
             'pagenum' => $this->pagenum,
+            'total' => $this->total,
         );
 
         return $_page;

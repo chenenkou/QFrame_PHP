@@ -201,6 +201,8 @@ function arr2InsertSql($data) {
         'values' => array(),
     );
     foreach ($data as $k=>$v) {
+        $v = addslashes($v);
+
         $arr['fields'][] = "`{$k}`";
         $arr['values'][] = "'{$v}'";
     }

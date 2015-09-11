@@ -20,7 +20,7 @@ class Db {
     // 错误信息
     protected $error            = '';
     // 当前连接ID
-    protected $linkID           =   null;
+    protected $linkID           = null;
     // 当前查询ID
     protected $queryID          = null;
     // 是否已经连接数据库
@@ -28,7 +28,9 @@ class Db {
     // 数据库连接参数配置
     protected $config           = '';
     // 数据库表名
-    protected $tableName           = null;
+    protected $tableName        = null;
+    // 数据库表前缀
+    protected $tablePrefix      = null;
     /**
      * 架构函数
      * @access public
@@ -82,6 +84,9 @@ class Db {
             }
             // 标记连接成功
             $this->connected    =   true;
+            // 设置表前缀
+            if (!isset($this->config['table_prefix'])) $this->config['table_prefix'] = '';
+            $this->tablePrefix = $this->config['table_prefix'];
             // 注销数据库连接配置信息
             unset($this->config);
         }
@@ -325,7 +330,6 @@ class Db {
      * @return string
      */
     public function getTablePrefix() {
-        if (!isset($this->config['table_prefix'])) $this->config['table_prefix'] = '';
-        return $this->config['table_prefix'];
+        return $this->tablePrefix;
     }
 }

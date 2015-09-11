@@ -248,4 +248,15 @@ function offClient() {
     ob_end_flush();
     flush();
 }
+
+/**
+ * 删除数组中的指定的key
+ * @param $arr
+ * @param $keys
+ */
+function unset_keys(&$arr, $keys) {
+    foreach($keys as $v) {
+        unset($arr[$v]);
+    }
+}
 ?>
