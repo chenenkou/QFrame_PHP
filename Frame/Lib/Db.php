@@ -41,6 +41,9 @@ class Db {
             die('not suppert : mysql');
         }
         $this->config   =  $config;
+        // 设置表前缀
+        if (!isset($this->config['table_prefix'])) $this->config['table_prefix'] = '';
+        $this->tablePrefix = $this->config['table_prefix'];
     }
 
     /**
@@ -84,9 +87,6 @@ class Db {
             }
             // 标记连接成功
             $this->connected    =   true;
-            // 设置表前缀
-            if (!isset($this->config['table_prefix'])) $this->config['table_prefix'] = '';
-            $this->tablePrefix = $this->config['table_prefix'];
             // 注销数据库连接配置信息
             unset($this->config);
         }
