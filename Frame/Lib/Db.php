@@ -64,7 +64,7 @@ class Db {
      * @access public
      */
     public function connect() {
-        if(!$this->connected) {
+        if( !$this->connected ) {
             $config =   $this->config;
             // 处理不带端口号的socket连接情况
             $host = $config['db_host'].($config['db_port']?":{$config['db_port']}":'');
@@ -158,6 +158,7 @@ class Db {
     public function getColumns($table_name) {
         $str = 'SHOW COLUMNS FROM '.$table_name;
         $res = $this->query($str);
+        $arr = array();
         foreach($res as $k=>$v) {
             $arr['field'][] = $v['Field'];
             if($v['Key'] == 'PRI') {
@@ -192,23 +193,21 @@ class Db {
     /**
      * 启动事务
      * @access public
-     * @return void
      */
     public function startTrans() {
-        $this->connect(true);
+        $this->connect();
         if ( !$this->linkID ) return false;
         //数据rollback 支持
         if ($this->transTimes == 0) {
             mysql_query('START TRANSACTION', $this->linkID);
         }
         $this->transTimes++;
-        return ;
+        return true;
     }
 
     /**
      * 用于非自动提交状态下面的查询提交
      * @access public
-     * @return boolen
      */
     public function commit() {
         if ($this->transTimes > 0) {
@@ -216,7 +215,6 @@ class Db {
             $this->transTimes = 0;
             if(!$result){
                 die($this->error());
-                return false;
             }
         }
         return true;
@@ -225,7 +223,6 @@ class Db {
     /**
      * 事务回滚
      * @access public
-     * @return boolen
      */
     public function rollback() {
         if ($this->transTimes > 0) {
@@ -233,7 +230,6 @@ class Db {
             $this->transTimes = 0;
             if(!$result){
                 die($this->error());
-                return false;
             }
         }
         return true;
@@ -247,7 +243,6 @@ class Db {
     public function getAll() {
         if ( !$this->queryID ) {
             die($this->error());
-            return false;
         }
         //返回数据集
         $result = array();
@@ -263,7 +258,6 @@ class Db {
     /**
      * 关闭数据库
      * @access public
-     * @throws ThinkExecption
      */
     public function close() {
         if (!empty($this->queryID))
