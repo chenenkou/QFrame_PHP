@@ -15,6 +15,15 @@
 			'db_name'  => 'test',
             'db_type'  => 'mysql',
 		),
+        /* 数据库置1 */
+        'DB_CONFIG1' => array(
+            'db_user'  => 'root',
+            'db_pwd'   => 'root',
+            'db_host'  => '127.0.0.1',
+            'db_port'  => '3306',
+            'db_name'  => 'test',
+            'db_type'  => 'mysql',
+        ),
         /* 邮件发送者的配置 */
 		'MAIL_CONFIG' => array(
             'host' => 'smtp.163.com',

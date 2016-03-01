@@ -6,14 +6,16 @@
  */
 
 class Model {
-    //数据库连接
+    // 数据库连接
     protected $_db;
+    // 数据库配置 - 子类可以修改该属性切换数据库
+    protected $db_config = 'DB_CONFIG0';
 
     /**
      * 初始化
      */
     public function __construct() {
-        $this->connectDb('DB_CONFIG0');
+        $this->connectDb($this->db_config);
     }
 
     /**
@@ -144,6 +146,8 @@ class Model {
             $values = "({$values})";
         }
         // 处理需要插入的表名
+        if (method_exists($this, 'tableName'))
+            $table = $this->tableName();
         if (empty($table))
             $table = $this->_db->getTablePrefix() . strtolower(get_class($this));
 
