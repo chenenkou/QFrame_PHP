@@ -12,7 +12,8 @@
 			'db_pwd'   => 'root',
 			'db_host'  => '127.0.0.1',
 			'db_port'  => '3306',
-			'db_name'  => 'test'
+			'db_name'  => 'test',
+            'db_type'  => 'mysql',
 		),
         /* 邮件发送者的配置 */
 		'MAIL_CONFIG' => array(
