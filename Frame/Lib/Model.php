@@ -8,22 +8,43 @@
 class Model {
     // 数据库连接
     protected $_db;
-    // 数据库配置 - 子类可以修改该属性切换数据库
+    // 数据库配置
     protected $db_config = 'DB_CONFIG0';
+    // 模型对应表名
+    protected $table_name = null;
 
     /**
      * 初始化
      */
     public function __construct() {
-        $this->connectDb($this->db_config);
+        $this->connectDb();
     }
 
     /**
      * 连接数据库
      * @param $dbConfig
      */
-    public function connectDb($dbConfig) {
-        $this->_db = D($dbConfig);
+    public function connectDb() {
+        $this->_db = $this->getDbConnection();
+        $this->table_name = $this->tableName();
+    }
+
+    /**
+     * 获取数据库连接配置
+     * 子类可以覆盖该方法切换数据库
+     * @return Model
+     */
+    public function getDbConnection() {
+        return D($this->db_config);
+    }
+
+    /**
+     * 获取模型对应表名
+     * 子类应该覆盖该方法表明对应数据表
+     * @return null
+     */
+    public function tableName() {
+        return $this->table_name;
     }
 
     /**
@@ -146,8 +167,7 @@ class Model {
             $values = "({$values})";
         }
         // 处理需要插入的表名
-        if (method_exists($this, 'tableName'))
-            $table = $this->tableName();
+        $table = $this->tableName();
         if (empty($table))
             $table = $this->_db->getTablePrefix() . strtolower(get_class($this));
 
