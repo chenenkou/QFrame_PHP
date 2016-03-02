@@ -8,7 +8,7 @@
 class Model {
     // 数据库连接
     protected $_db;
-    // 数据库配置
+    // 数据库配置 - 子类可以修改该属性切换数据库
     protected $db_config = 'DB_CONFIG0';
     // 模型对应表名
     protected $table_name = null;
@@ -44,7 +44,7 @@ class Model {
      * @return null
      */
     public function tableName() {
-        return $this->table_name;
+        return $this->_db->getTablePrefix() . hump2underline(get_class($this));
     }
 
     /**
@@ -168,8 +168,6 @@ class Model {
         }
         // 处理需要插入的表名
         $table = $this->tableName();
-        if (empty($table))
-            $table = $this->_db->getTablePrefix() . strtolower(get_class($this));
 
         $sql = "INSERT INTO {$table} ({$fields}) VALUES {$values}";
         return $this->execute($sql);
