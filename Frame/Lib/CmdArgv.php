@@ -64,10 +64,13 @@ class CmdArgv {
         array_shift($argv);
         $params = array();
         foreach ($argv as $arg) {
-            $argArr = explode("=", $arg);
-            if (count($argArr) != 2)
+            $pos = strpos($arg, "=");
+            $pKey = substr($arg, 0, $pos);
+            $pValue = substr($arg, $pos+1);
+            if ( empty($pKey) || empty($pValue) )
                 die("Params error \n");
-            $params[$argArr[0]] = $argArr[1];
+
+            $params[$pKey] = $pValue;
         }
 
         $this->controllerClassName = $controllerClassName;
