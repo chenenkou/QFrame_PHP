@@ -49,7 +49,12 @@ function __autoload($class_name) {
 function C($name=null, $value=null, $c = false) {
     static $_config = array();
     if(empty($_config)) {
-        $_config = array_change_key_case(F('config', '', 1, CORE_PATH.'Conf/'));
+        $confPath = CORE_PATH.'Conf/';
+        $_config = array_change_key_case(F('config', '', 1, $confPath));
+        if ( file_exists( $confPath . 'main.php') ) {
+            $_mainConfig = array_change_key_case(F('main', '', 1, $confPath));
+            $_config = array_merge($_config, $_mainConfig);
+        }
     }
     // 无参数时获取所有
     if (empty($name)) {
@@ -102,9 +107,10 @@ function D($connection='') {
 /**
  * 快速文件数据读取和保存 针对简单类型数据 字符串、数组
  * @param string $name 缓存名称
- * @param mixed $value 缓存值
+ * @param string $value 缓存值
+ * @param bool $zip
  * @param string $path 缓存路径
- * @return mixed
+ * @return array|bool|int|mixed|string
  */
 function F($name, $value='',$zip=true, $path=DATA_PATH) {
     static $_cache  = array();

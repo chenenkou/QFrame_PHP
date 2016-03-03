@@ -14,6 +14,7 @@
 			'db_port'  => '3306',
 			'db_name'  => 'test',
             'db_type'  => 'mysql',
+            'table_prefix' => 't_',
 		),
         /* 数据库置1 */
         'DB_CONFIG1' => array(
@@ -23,6 +24,7 @@
             'db_port'  => '3306',
             'db_name'  => 'test',
             'db_type'  => 'mysql',
+            'table_prefix' => 't_',
         ),
         /* 邮件发送者的配置 */
 		'MAIL_CONFIG' => array(

@@ -115,7 +115,7 @@ class CmdArgv {
             $paramValues[] = $params[$v->name];
         }
 
-        call_user_func_array(array($controllerClassName, $action),  $paramValues);
+        call_user_func_array(array(new $controllerClassName, $action),  $paramValues);
     }
 
 }
