@@ -29,17 +29,6 @@ function L($fileName, $content) {
 }
 
 /**
- * 自动加载Lib类
- */
-function __autoload($class_name) {
-    $dirNames = C('AUTOLOAD_CLASS_DIRS');
-    foreach ($dirNames as $dirName) {
-        $file = CORE_PATH . $dirName . "/".$class_name.".php";
-        if (is_file($file)) { require_once($file); break; }
-    }
-}
-
-/**
  * 获取和设置配置参数 支持批量定义
  * @param string|array $name 配置变量
  * @param mixed $value 配置值
@@ -71,7 +60,7 @@ function C($name=null, $value=null, $c = false) {
                 $_config = array_change_key_case($_config, CASE_UPPER);
                 F('config', $_config, CORE_PATH.'Conf/');
             }
-            return;
+            return true;
         }
         // 二维数组设置和获取支持
         $name = explode('.', $name);
@@ -83,7 +72,7 @@ function C($name=null, $value=null, $c = false) {
             $_config = array_change_key_case($_config, CASE_UPPER);
             F('config', $_config, 1, CORE_PATH.'Conf/');
         }
-        return;
+        return true;
     }
     return null; // 避免非法参数
 }

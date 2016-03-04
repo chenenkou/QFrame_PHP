@@ -12,5 +12,6 @@
     define('VIEW_PATH', ROOT. FOLDER_NAME .'/View/'); // 模板文件夹路径
     require_once(CORE_PATH."Common/common.php");      // 载入基础函数
     require_once(CORE_PATH."Common/functions.php");      // 载入公用函数
+    require_once(LIB_PATH . 'QAutoloader.php'); // 自动加载类
     // 部分设置项
     date_default_timezone_set('PRC'); // 设置为中国时区

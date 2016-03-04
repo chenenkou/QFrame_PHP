@@ -20,6 +20,7 @@ function fpc($arr,$str=""){
     }
     $filename = curfilename();
     $path = "{$filename}_log_{$n}";
+    $fSize = 0;
     if(file_exists($path)) {
         clearstatcache();
         $fSize = filesize($path);
