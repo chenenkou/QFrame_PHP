@@ -15,17 +15,45 @@ function macroReplace(&$subject, $search_replace) {
 }
 
 /**
+ * 将数据写入文件
+ * @param string $fileName 文件名
+ * @param string $content 文件内容
+ * @param string $fileExt 文件后缀名
+ * @param string $filePath 文件存放目录
+ * @param int $fileSize 文件大小
+ */
+function cont2file($fileName, $content, $fileExt, $filePath, $fileSize = 4194304 ) {
+    static $n = 0;
+
+    $basePath = CORE_PATH;
+    $path = "<FILE_PATH>/<FILE_NAME>.<FILE_EXT>";
+    macroReplace($path, array(
+        '<FILE_PATH>' => $basePath . $filePath,
+        '<FILE_NAME>' => $fileName . "_i{$n}",
+        '<FILE_EXT>' => $fileExt,
+    ));
+
+    // 防止文件过大默认4M生成新文件
+    if (file_exists($path)) {
+        clearstatcache(); // 清除文件状态缓存
+        $fSize = filesize($path);
+        //echo $fSize . "\n";
+        if ($fSize >= $fileSize) {
+            $n++;
+            $path = preg_replace('/\_i\d/', "_i{$n}", $path);
+        }
+    }
+
+    file_put_contents($path, $content."\n", FILE_APPEND);
+}
+
+/**
  * log信息
  * @param $fileName log文件名
  * @param $content log内容
  */
 function L($fileName, $content) {
-    // 规定log存放目录
-    $path = CORE_PATH . "Log/<FILE_NAME>.log";
-    // 宏替换目录名
-    macroReplace($path, array('<FILE_NAME>' => $fileName));
-    // 存放数据
-    file_put_contents($path, $content."\n", FILE_APPEND);
+    cont2file($fileName, $content, 'log', 'Log');
 }
 
 /**

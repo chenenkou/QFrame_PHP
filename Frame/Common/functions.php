@@ -4,12 +4,11 @@
  */
 
 /**
- * 文件保存记录
+ * 文件保存记录调试
  * @param array $arr 数组源
  * @param string $str 记录说明文字
  */
 function fpc($arr,$str=""){
-    static $n = 0;
     static $z = 0; //函数脚本执行次数
     $z++;
     if($str!=""){$str .= "------";}
@@ -19,16 +18,8 @@ function fpc($arr,$str=""){
         $val = $arr;
     }
     $filename = curfilename();
-    $path = "{$filename}_log_{$n}";
-    $fSize = 0;
-    if(file_exists($path)) {
-        clearstatcache();
-        $fSize = filesize($path);
-    }
-    if($fSize>(5000*1024)) { //日志文件大于10M重新生成新文件
-        $n++;
-        $path = "{$filename}_log_{$n}";
-    }
+    $path = "{$filename}_log";
+
     L($path, "[{$z}]".$str.date("Y-m-d H:i:s")."\n".$val."\n");
 }
 
