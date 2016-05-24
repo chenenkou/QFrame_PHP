@@ -99,6 +99,14 @@ function p($arr){
 }
 
 /**
+ * 打印数据并换行
+ * @param mixed $data
+ */
+function pL($data) {
+    echo print_r($data, true) . "\n";
+}
+
+/**
  * 两个二维数组合并
  * @param $a
  * @param $b

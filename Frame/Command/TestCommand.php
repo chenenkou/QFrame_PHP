@@ -7,6 +7,6 @@
 class TestCommand extends Command
 {
     public function execute($name = 'TestCommand') {
-        echo $name . "\n";
+        pL($name);
     }
 }
