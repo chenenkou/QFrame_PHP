@@ -253,13 +253,13 @@ class Curl {
         fclose($fp);
     }
 
-    /*
-* get 方式获取访问指定地址
-* @param string url 要访问的地址
-* @param string cookie cookie的存放地址,没有则不发送cookie
-* @return string curl_exec()获取的信息
-* @author andy
-**/
+    /**
+     * get 方式获取访问指定地址
+     * @param string url 要访问的地址
+     * @param string cookie cookie的存放地址,没有则不发送cookie
+     * @return string curl_exec()获取的信息
+     * @author andy
+     */
     public function get_m( $url, $cookie='' )
     {
         // 初始化一个cURL会话
@@ -282,14 +282,14 @@ class Curl {
         curl_close($curl);
         return $tmp;
     }
-    /*
-    * post 方式模拟请求指定地址
-    * @param string url 请求的指定地址
-    * @param array params 请求所带的
-    * #patam string cookie cookie存放地址
-    * @return string curl_exec()获取的信息
-    * @author andy
-    **/
+    /**
+     * post 方式模拟请求指定地址
+     * @param string url 请求的指定地址
+     * @param array params 请求所带的
+     * #patam string cookie cookie存放地址
+     * @return string curl_exec()获取的信息
+     * @author andy
+     */
     public function post_m( $url, $params, $cookie = '' )
     {
         $curl = curl_init($url);
