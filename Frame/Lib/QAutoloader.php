@@ -12,36 +12,39 @@ QAutoloader::Register();
 class QAutoloader
 {
     /**
-     * Register the Autoloader with SPL
-     *
+     * 注册自动装卸机SPL
      */
     public static function Register() {
         if (function_exists('__autoload')) {
-            //    Register any existing autoloader function with SPL, so we don't get any clashes
+            // 注册任何现有的自动装卸机与SPL函数,所以我们没有任何冲突
             spl_autoload_register('__autoload');
         }
-        //    Register ourselves with SPL
+        // 在SPL注册自己的
         return spl_autoload_register(array('QAutoloader', 'Load'));
-    }   //    function Register()
-
+    }
 
     /**
-     * Autoload a class identified by name
-     *
-     * @param    string    $pClassName        Name of the object to load
+     * 自动装载类识别的名字
+     * @param string $pClassName 加载对象的名称
+     * @return bool
      */
     public static function Load($pClassName) {
         if (class_exists($pClassName,FALSE))
             return FALSE;
 
         $dirNames = C('AUTOLOAD_CLASS_DIRS');
+        if ( empty($dirNames) )
+            return true;
+
         foreach ($dirNames as $dirName) {
             $pClassFilePath = CORE_PATH . $dirName . DIRECTORY_SEPARATOR .$pClassName.".php";
 
-            if ((file_exists($pClassFilePath) === FALSE) || (is_readable($pClassFilePath) === FALSE)) // Can't load
-                return FALSE;
+            // 不能加载,跳过
+            if ((file_exists($pClassFilePath) === FALSE) || (is_readable($pClassFilePath) === FALSE))
+                continue;
 
             require_once($pClassFilePath);
+            return true;
         }
-    }   //    function Load()
+    }
 }

@@ -312,7 +312,6 @@ function remove_url_param($var, $url = null) {
     return rtrim(rtrim($url, "&"), "?");
 }
 
-
 /**
  * 替换URL中的指定GET变量
  * @param $param 要替换的GET变量
@@ -327,4 +326,13 @@ function replace_url_param($param, $uri = null) {
         $separator = '?';
     $uri .= "{$separator}{$param}";
     return $uri;
+}
+
+/**
+ * 驼峰命名转下划线命名
+ * @param $str
+ * @return string
+ */
+function hump2underline($str) {
+    return strtolower(preg_replace('/((?<=[a-z])(?=[A-Z]))/', '_', $str));
 }
