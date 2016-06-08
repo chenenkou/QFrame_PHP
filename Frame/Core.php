@@ -2,7 +2,7 @@
     header("Content-type: text/html; charset=utf-8");
     define('Q_VERSION', '3.1.160229'); // 版本号
     if (!defined('ROOT')) {
-        define('ROOT', dirname(__FILE__) .'/../'); // 根目录常量设置检测
+        define('ROOT', dirname(dirname(__FILE__)) . '/'); // 根目录常量设置检测
     }
     define('FOLDER_NAME', 'Frame'); // 框架文件夹名称
     define('CORE_PATH', ROOT. FOLDER_NAME .'/'); // 框架文件夹路径
