@@ -167,7 +167,8 @@ class Model {
             $values = "({$values})";
         }
         // 处理需要插入的表名
-        $table = $this->tableName();
+        if ( empty($table) )
+            $table = $this->tableName();
 
         $sql = "INSERT INTO {$table} ({$fields}) VALUES {$values}";
         return $this->execute($sql);
