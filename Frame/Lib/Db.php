@@ -3,8 +3,10 @@ define('CLIENT_MULTI_RESULTS', 131072);
 /**
  * 只支持mysql
  */
-class Db {
-    static private $_instance   = array();
+class Db implements DbInterface
+{
+    // 连接池
+    private static $_instance   = array();
     // 是否使用永久连接
     protected $pconnect         = false;
     // 当前SQL指令
@@ -36,7 +38,8 @@ class Db {
      * @access public
      * @param array $config 数据库配置数组
      */
-    public function __construct($config=''){
+    public function __construct($config='')
+    {
         if ( !extension_loaded('mysql') ) {
             die('not suppert : mysql');
         }
@@ -52,9 +55,10 @@ class Db {
      * @access public
      * @return mixed 返回数据库驱动类
      */
-    public static function getInstance($k=0, $db_config='') {
+    public static function getInstance($k=0, $db_config='')
+    {
         if (!isset(self::$_instance[$k])){
-            self::$_instance[$k] = new Db($db_config);
+            self::$_instance[$k] = new self($db_config);
         }
         return self::$_instance[$k];
     }
@@ -63,7 +67,8 @@ class Db {
      * 连接数据库方法
      * @access public
      */
-    public function connect() {
+    public function connect()
+    {
         if( !$this->connected ) {
             $config =   $this->config;
             // 处理不带端口号的socket连接情况
@@ -79,7 +84,8 @@ class Db {
             $dbVersion = mysql_get_server_info($this->linkID);
             if ($dbVersion >= "4.1") {
                 //使用UTF8存取数据库 需要mysql 4.1.0以上支持
-                mysql_query("SET NAMES '".C('DB_CHARSET')."'", $this->linkID);
+                $db_charset = isset($config['db_charset']) ? $config['db_charset'] : C('DB_CHARSET');
+                mysql_query("SET NAMES '".$db_charset."'", $this->linkID);
             }
             //设置 sql_model
             if($dbVersion >'5.0.1'){
@@ -93,12 +99,27 @@ class Db {
     }
 
     /**
-     * 释放查询结果
+     * 执行语句 针对 INSERT, UPDATE 以及DELETE
      * @access public
+     * @param string $str  sql指令
+     * @return integer
+     * @throws Exception
      */
-    public function free() {
-        mysql_free_result($this->queryID);
-        $this->queryID = 0;
+    public function execute($str='')
+    {
+        $this->connect();
+        if ( !$this->linkID ) return false;
+        if ( $str != '' ) $this->queryStr = $str;
+        //释放前次的查询结果
+        if ( $this->queryID ) {    $this->free();    }
+        $result =   mysql_query($this->queryStr, $this->linkID) ;
+        if ( false === $result) {
+            throw new Exception($this->error());
+        } else {
+            $this->numRows = mysql_affected_rows($this->linkID);
+            $this->lastInsID = mysql_insert_id($this->linkID);
+            return $this->numRows;
+        }
     }
 
     /**
@@ -108,7 +129,8 @@ class Db {
      * @param string $str  sql指令
      * @return mixed
      */
-    public function query($str='') {
+    public function query($str='')
+    {
         $this->connect();
         if ( !$this->linkID ) return false;
         if ( $str != '' ) $this->queryStr = $str;
@@ -125,12 +147,13 @@ class Db {
 
     /**
      * 执行查询 主要针对 SELECT等指令
-     * 返回一条字段
+     * 返回一条记录
      * @access public
      * @param string $str  sql指令
      * @return mixed
      */
-    public function find($str) {
+    public function find($str)
+    {
         $res = $this->query($str);
         $res = array_shift($res);
         return $res;
@@ -143,9 +166,49 @@ class Db {
      * @param string $str  sql指令
      * @return mixed
      */
-    public function count($str) {
+    public function count($str)
+    {
         $res = $this->find($str);
         return array_shift($res);
+    }
+
+    /**
+     * 获取最近插入的ID
+     * @access public
+     * @return string
+     */
+    public function getLastInsID()
+    {
+        return $this->lastInsID;
+    }
+
+    /**
+     * 获取最近一次查询的sql语句
+     * @access public
+     * @return string
+     */
+    public function getLastSql()
+    {
+        return $this->queryStr;
+    }
+
+    /**
+     * 释放查询结果
+     * @access public
+     */
+    public function free()
+    {
+        mysql_free_result($this->queryID);
+        $this->queryID = 0;
+    }
+
+    /**
+     * 获取表前缀
+     * @return string
+     */
+    public function getTablePrefix()
+    {
+        return $this->tablePrefix;
     }
 
     /**
@@ -155,7 +218,8 @@ class Db {
      * @param string $table_name  表名
      * @return mixed field为字段名 pri为主键
      */
-    public function getColumns($table_name) {
+    public function getColumns($table_name)
+    {
         $str = 'SHOW COLUMNS FROM '.$table_name;
         $res = $this->query($str);
         $arr = array();
@@ -169,32 +233,22 @@ class Db {
     }
 
     /**
-     * 执行语句 针对 INSERT, UPDATE 以及DELETE
+     * SQL指令安全过滤
      * @access public
-     * @param string $str  sql指令
-     * @return integer
+     * @param string $str  SQL字符串
+     * @return string
      */
-    public function execute($str='') {
-        $this->connect();
-        if ( !$this->linkID ) return false;
-        if ( $str != '' ) $this->queryStr = $str;
-        //释放前次的查询结果
-        if ( $this->queryID ) {    $this->free();    }
-        $result =   mysql_query($this->queryStr, $this->linkID) ;
-        if ( false === $result) {
-           throw new Exception($this->error());
-        } else {
-            $this->numRows = mysql_affected_rows($this->linkID);
-            $this->lastInsID = mysql_insert_id($this->linkID);
-            return $this->numRows;
-        }
+    public function escapeString($str)
+    {
+        return mysql_escape_string($str);
     }
 
     /**
      * 启动事务
      * @access public
      */
-    public function startTrans() {
+    public function startTrans()
+    {
         $this->connect();
         if ( !$this->linkID ) return false;
         //数据rollback 支持
@@ -206,25 +260,11 @@ class Db {
     }
 
     /**
-     * 用于非自动提交状态下面的查询提交
-     * @access public
-     */
-    public function commit() {
-        if ($this->transTimes > 0) {
-            $result = mysql_query('COMMIT', $this->linkID);
-            $this->transTimes = 0;
-            if(!$result){
-                die($this->error());
-            }
-        }
-        return true;
-    }
-
-    /**
      * 事务回滚
      * @access public
      */
-    public function rollback() {
+    public function rollback()
+    {
         if ($this->transTimes > 0) {
             $result = mysql_query('ROLLBACK', $this->linkID);
             $this->transTimes = 0;
@@ -236,11 +276,57 @@ class Db {
     }
 
     /**
+     * 用于非自动提交状态下面的查询提交
+     * @access public
+     */
+    public function commit()
+    {
+        if ($this->transTimes > 0) {
+            $result = mysql_query('COMMIT', $this->linkID);
+            $this->transTimes = 0;
+            if(!$result){
+                die($this->error());
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 关闭数据库
+     * @access public
+     */
+    public function close()
+    {
+        if (!empty($this->queryID))
+            mysql_free_result($this->queryID);
+        if ($this->linkID && !mysql_close($this->linkID)){
+            die($this->error());
+        }
+        $this->linkID = 0;
+    }
+
+    /**
+     * 数据库错误信息
+     * 并显示当前的SQL语句
+     * @access public
+     * @return string
+     */
+    public function error()
+    {
+        $this->error = mysql_error($this->linkID);
+        if($this->queryStr!=''){
+            $this->error .= "\n [ SQL语句 ] : ".$this->queryStr."\n";
+        }
+        return $this->error;
+    }
+
+    /**
      * 获得所有的查询数据
      * @access public
      * @return array
      */
-    public function getAll() {
+    protected function getAll()
+    {
         if ( !$this->queryID ) {
             die($this->error());
         }
@@ -256,74 +342,12 @@ class Db {
     }
 
     /**
-     * 关闭数据库
-     * @access public
-     */
-    public function close() {
-        if (!empty($this->queryID))
-            mysql_free_result($this->queryID);
-        if ($this->linkID && !mysql_close($this->linkID)){
-            die($this->error());
-        }
-        $this->linkID = 0;
-    }
-
-    /**
-     * 数据库错误信息
-     * 并显示当前的SQL语句
-     * @access public
-     * @return string
-     */
-    public function error() {
-        $this->error = mysql_error($this->linkID);
-        if($this->queryStr!=''){
-            $this->error .= "\n [ SQL语句 ] : ".$this->queryStr."\n";
-        }
-        return $this->error;
-    }
-
-    /**
-     * SQL指令安全过滤
-     * @access public
-     * @param string $str  SQL字符串
-     * @return string
-     */
-    public function escapeString($str) {
-        return mysql_escape_string($str);
-    }
-
-    /**
      * 析构方法
      * @access public
      */
-    public function __destruct() {
+    public function __destruct()
+    {
         // 关闭连接
         $this->close();
-    }
-
-    /**
-     * 获取最近一次查询的sql语句
-     * @access public
-     * @return string
-     */
-    public function getLastSql() {
-        return $this->queryStr;
-    }
-
-    /**
-     * 获取最近插入的ID
-     * @access public
-     * @return string
-     */
-    public function getLastInsID(){
-        return $this->lastInsID;
-    }
-
-    /**
-     * 获取表前缀
-     * @return string
-     */
-    public function getTablePrefix() {
-        return $this->tablePrefix;
     }
 }
