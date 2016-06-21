@@ -1,6 +1,6 @@
 <?php
     header("Content-type: text/html; charset=utf-8");
-    define('Q_VERSION', '3.1.160229'); // 版本号
+    define('Q_VERSION', '3.2.160622'); // 版本号
     if (!defined('ROOT')) {
         define('ROOT', dirname(dirname(__FILE__)) . '/'); // 根目录常量设置检测
     }

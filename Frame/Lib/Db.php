@@ -139,7 +139,7 @@ class Db implements DbInterface
             throw new Exception($this->error());
         } else {
             $this->numRows = mysql_num_rows($this->queryID);
-            return $this->getAll();
+            return $this->fetchAll();
         }
     }
 
@@ -319,14 +319,13 @@ class Db implements DbInterface
 
     /**
      * 获得所有的查询数据
-     * @access public
+     * @access private
      * @return array
      */
-    protected function getAll()
+    private function fetchAll()
     {
-        if ( !$this->queryID ) {
-            die($this->error());
-        }
+        if ( !$this->queryID )
+            throw new Exception($this->error());
         //返回数据集
         $result = array();
         if($this->numRows >0) {

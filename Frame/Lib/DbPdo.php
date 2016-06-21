@@ -243,21 +243,13 @@ class DbPdo implements DbInterface
      * @access public
      * @return string
      */
-    public function error() {
+    public function error()
+    {
         $this->error = '[' . $this->linkID->errorCode() . ']' . $this->linkID->errorInfo()[2];
         if($this->queryStr!=''){
             $this->error .= "\n [ SQL语句 ] : ".$this->queryStr."\n";
         }
         return $this->error;
-    }
-
-    /**
-     * 获得MYSQL版本信息
-     * @return mixed
-     */
-    public function getVersion()
-    {
-        return $this->linkID->getAttribute(PDO::ATTR_SERVER_VERSION);
     }
 
     /**
