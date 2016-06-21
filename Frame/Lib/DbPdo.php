@@ -5,20 +5,35 @@
  */
 class DbPdo implements DbInterface
 {
+    // 连接池
     private static $_instance   = array();
+    // 是否使用永久连接
+    protected $pconnect         = false;
     // 是否已经连接数据库
     protected $connected        = false;
-    public $linkID= null; //数据库连接
-    private $PDOStatement = null; //预准备
-    public $affectedRows; //受影响条数
-    protected $tablePrefix;
-    protected $queryStr;
-    protected $error = '';
+    // 当前SQL指令
+    protected $queryStr         = '';
+    // 最后插入ID
+    protected $lastInsID        = null;
+    // 返回或者影响记录数
+    protected $numRows          = 0;
+    // 错误信息
+    protected $error            = '';
+    // 当前连接ID
+    protected $linkID           = null;
+    // 预准备当前查询ID
+    private $PDOStatement       = null;
+    // 数据库连接参数配置
+    protected $config           = '';
+    // 数据库表名
+    protected $tableName        = null;
+    // 数据库表前缀
+    protected $tablePrefix      = null;
 
     /**
-     * 架构函数
-     * @access public
-     * @param array $config 数据库配置数组
+     * 构造函数
+     * DbPdo constructor.
+     * @param string $config
      */
     public function __construct($config=''){
         if ( !class_exists('PDO') ) {
@@ -36,7 +51,7 @@ class DbPdo implements DbInterface
      * @access public
      * @return mixed 返回数据库驱动类
      */
-    public function getInstance($k=0, $db_config='')
+    public static function getInstance($k=0, $db_config='')
     {
         if (!isset(self::$_instance[$k])){
             self::$_instance[$k] = new self($db_config);
@@ -44,20 +59,28 @@ class DbPdo implements DbInterface
         return self::$_instance[$k];
     }
 
+    /**
+     * 连接数据库方法
+     * @access public
+     */
     public function connect()
     {
         if ( !$this->connected ) {
             $config = $this->config;
-            $dsn = "mysql:host=" . $config['db_host'] . ';dbname=' . $config['db_name'];
+            $dsn = "mysql:host=" . $config['db_host'] . ';dbname=' . $config['db_name'] . ';port=' . $config['db_port'];
             $username = $config['db_user'];
             $password = $config['db_pwd'];
+            $params = array();
+            if($this->pconnect){
+                //开启长连接，添加到配置数组中
+                $params[constant("PDO::ATTR_PERSISTENT")]=true;
+            }
             try {
-                $this->linkID = new Pdo($dsn, $username, $password);
+                $this->linkID = new Pdo($dsn, $username, $password, $params);
                 $character = isset($config['db_charset']) ? $config['db_charset'] : C("DB_CHARSET");
-                $sql = "SET character_set_connection=$character,character_set_results=$character,character_set_client=binary";
-                $this->linkID->query($sql);
+                $this->linkID->exec('SET NAMES '.$character);
             } catch (PDOException $e) {
-                return false;
+                throw new Exception($e->getMessage());
             }
 
             // 标记连接成功
@@ -69,130 +92,90 @@ class DbPdo implements DbInterface
         return true;
     }
 
-    //获得最后插入的ID号
-    public function getLastInsID()
-    {
-        return $this->linkID->lastInsertId();
-    }
-
-    //获得受影响的行数
-    public function getAffectedRows()
-    {
-        return $this->affectedRows;
-    }
-
-    //数据安全处理
-    public function escapeString($str)
-    {
-        return addslashes($str);
-    }
-
-    //执行SQL没有返回值
-    public function execute($sql)
+    /**
+     * 执行语句 针对 INSERT, UPDATE 以及DELETE
+     * @access public
+     * @param string $str  sql指令
+     * @return integer
+     * @throws Exception
+     */
+    public function execute($str)
     {
         $this->connect();
-        /**
-         * 记录SQL语句
-         */
-        if ( $sql != '' ) $this->queryStr = $sql;
-        //释放结果
-        if (!$this->PDOStatement)
-            $this->free();
-        $this->PDOStatement = $this->linkID->prepare($sql);
-        //预准备失败
-        if ($this->PDOStatement === false) {
-            $this->error();
-            return false;
+        if ( !$this->linkID ) return false;
+        if ( $str != '' ) $this->queryStr = $str;
+        //释放前次的查询结果
+        if ( $this->PDOStatement ) {    $this->free();    }
+        $result = $this->linkID->exec($str);
+        if($result === false){
+            throw new Exception($this->error());
+        }else{
+            $this->numRows = $result;
+            $this->lastInsertId=$this->linkID->lastInsertId();
+            return $this->numRows;
         }
-        $result = $this->PDOStatement->execute();
-        //执行SQL失败
-        if ($result === false) {
-            $this->error();
-            return false;
-        } else {
-            $insert_id = $this->linkID->lastInsertId();
-            return $insert_id ? $insert_id : TRUE;
-        }
-    }
-
-    //发送查询 返回数组
-    public function query($sql)
-    {
-        //发送SQL
-        if (!$this->execute($sql)) {
-            return false;
-        }
-        $list = $this->PDOStatement->fetchAll(PDO::FETCH_ASSOC);
-        //受影响条数
-        $this->affectedRows = count($list);
-
-        return empty($list) ? array() : $list;
-    }
-
-    //遍历结果集(根据INSERT_ID)
-    protected function fetch()
-    {
-        $res = $this->lastquery->fetch(PDO::FETCH_ASSOC);
-        if (!$res) {
-            $this->free();
-        }
-        return $res;
-    }
-
-    // 返回一条记录
-    public function find($str)
-    {
-
-    }
-    // 返回一条数目
-    public function count($str)
-    {
-
     }
 
     /**
-     * 数据库错误信息
-     * 并显示当前的SQL语句
+     * 执行查询 主要针对 SELECT, SHOW 等指令
+     * 返回数据集
+     * @access public
+     * @param string $str  sql指令
+     * @return mixed
+     */
+    public function query($str)
+    {
+        $this->connect();
+        if ( !$this->linkID ) return false;
+        if ( $str != '' ) $this->queryStr = $str;
+        //释放前次的查询结果
+        if ( $this->PDOStatement ) {    $this->free();    }
+        $this->PDOStatement = $this->linkID->prepare($str);
+        $result = $this->PDOStatement->execute();
+        //执行SQL失败
+        if ($result === false) {
+            throw new Exception($this->error());
+        } else {
+            $this->numRows = $this->PDOStatement->rowCount();
+            $list = $this->PDOStatement->fetchAll(PDO::FETCH_ASSOC);
+            return empty($list) ? array() : $list;
+        }
+    }
+
+    /**
+     * 执行查询 主要针对 SELECT等指令
+     * 返回一条记录
+     * @access public
+     * @param string $str  sql指令
+     * @return mixed
+     */
+    public function find($str)
+    {
+        $res = $this->query($str);
+        return array_shift($res);
+    }
+
+    /**
+     * 执行查询 主要针对 SELECT等指令
+     * 返回一条数目
+     * @access public
+     * @param string $str  sql指令
+     * @return mixed
+     */
+    public function count($str)
+    {
+        $res = $this->find($str);
+        return array_shift($res);
+    }
+
+    /**
+     * 获取最近插入的ID
      * @access public
      * @return string
      */
-    public function error() {
-        $this->error = $this->linkID->errorCode();
-        if($this->queryStr!=''){
-            $this->error .= "\n [ SQL语句 ] : ".$this->queryStr."\n";
-        }
-        return $this->error;
-    }
-
-    //释放结果集
-    public function free()
+    public function getLastInsID()
     {
-        $this->PDOStatement = NULL;
-    }
-
-
-    // 获得MYSQL版本信息
-    public function getVersion()
-    {
-        return $this->linkID->getAttribute(PDO::ATTR_SERVER_VERSION);
-    }
-
-    //开启事务处理
-    public function startTrans()
-    {
-        $this->linkID->beginTransaction();
-    }
-
-    //提供一个事务
-    public function commit()
-    {
-        $this->linkID->commit();
-    }
-
-    //回滚事务
-    public function rollback()
-    {
-        $this->linkID->rollback();
+        return $this->linkID->lastInsertId();
     }
 
     /**
@@ -204,7 +187,112 @@ class DbPdo implements DbInterface
         return $this->queryStr;
     }
 
-    // 释放连接资源
+    /**
+     * 释放查询结果
+     * @access public
+     */
+    public function free()
+    {
+        $this->PDOStatement = NULL;
+    }
+
+    /**
+     * 获取表前缀
+     * @return string
+     */
+    public function getTablePrefix()
+    {
+        return $this->tablePrefix;
+    }
+
+    /**
+     * 获取一个表中的字段名
+     * 返回字段名数组
+     * @access public
+     * @param string $table_name  表名
+     * @return mixed field为字段名 pri为主键
+     */
+    public function getColumns($table_name)
+    {
+        $str = 'SHOW COLUMNS FROM '.$table_name;
+        $res = $this->query($str);
+        $arr = array();
+        foreach($res as $k=>$v) {
+            $arr['field'][] = $v['Field'];
+            if($v['Key'] == 'PRI') {
+                $arr['pri'] = $v['Field'];
+            }
+        }
+        return $arr;
+    }
+
+    /**
+     * SQL指令安全过滤
+     * @access public
+     * @param string $str  SQL字符串
+     * @return string
+     */
+    public function escapeString($str)
+    {
+        return addslashes($str);
+    }
+
+    /**
+     * 数据库错误信息
+     * 并显示当前的SQL语句
+     * @access public
+     * @return string
+     */
+    public function error() {
+        $this->error = '[' . $this->linkID->errorCode() . ']' . $this->linkID->errorInfo()[2];
+        if($this->queryStr!=''){
+            $this->error .= "\n [ SQL语句 ] : ".$this->queryStr."\n";
+        }
+        return $this->error;
+    }
+
+    /**
+     * 获得MYSQL版本信息
+     * @return mixed
+     */
+    public function getVersion()
+    {
+        return $this->linkID->getAttribute(PDO::ATTR_SERVER_VERSION);
+    }
+
+    /**
+     * 启动事务
+     * @access public
+     */
+    public function startTrans()
+    {
+        $this->connect();
+        if ( !$this->linkID ) return false;
+        $this->linkID->beginTransaction();
+    }
+
+    /**
+     * 事务回滚
+     * @access public
+     */
+    public function commit()
+    {
+        $this->linkID->commit();
+    }
+
+    /**
+     * 用于非自动提交状态下面的查询提交
+     * @access public
+     */
+    public function rollback()
+    {
+        $this->linkID->rollback();
+    }
+
+    /**
+     * 关闭数据库
+     * @access public
+     */
     public function close()
     {
         $this->PDOStatement = NULL;
@@ -213,21 +301,12 @@ class DbPdo implements DbInterface
         }
     }
 
-    //析构函数  释放连接资源
+    /**
+     * 析构方法
+     * @access public
+     */
     public function __destruct()
     {
         $this->close();
-    }
-
-    // 获取表前缀
-    public function getTablePrefix()
-    {
-        return $this->tablePrefix;
-    }
-
-    // 获取一个表中的字段名
-    public function getColumns($table_name)
-    {
-
     }
 }

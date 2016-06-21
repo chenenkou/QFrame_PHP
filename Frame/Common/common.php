@@ -118,6 +118,8 @@ function D($connection='') {
     preg_match($reg, $connection, $arr);
     $k = $arr[0];
     $config = C($connection);
+    if( class_exists("PDO") )
+        return DbPdo::getInstance($k, $config);
     return Db::getInstance($k, $config);
 }
 

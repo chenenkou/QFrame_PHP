@@ -15,8 +15,6 @@ class Db implements DbInterface
     protected $lastInsID        = null;
     // 返回或者影响记录数
     protected $numRows          = 0;
-    // 返回字段数
-    protected $numCols          = 0;
     // 事务指令数
     protected $transTimes       = 0;
     // 错误信息
@@ -138,7 +136,7 @@ class Db implements DbInterface
         if ( $this->queryID ) {    $this->free();    }
         $this->queryID = mysql_query($this->queryStr, $this->linkID);
         if ( !$this->queryID ) {
-            die($this->error());
+            throw new Exception($this->error());
         } else {
             $this->numRows = mysql_num_rows($this->queryID);
             return $this->getAll();
@@ -155,8 +153,7 @@ class Db implements DbInterface
     public function find($str)
     {
         $res = $this->query($str);
-        $res = array_shift($res);
-        return $res;
+        return array_shift($res);
     }
 
     /**
