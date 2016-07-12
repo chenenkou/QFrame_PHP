@@ -106,11 +106,14 @@ class DbPdo implements DbInterface
         if ( $str != '' ) $this->queryStr = $str;
         //释放前次的查询结果
         if ( $this->PDOStatement ) {    $this->free();    }
-        $result = $this->linkID->exec($str);
+        $this->PDOStatement = $this->linkID->prepare($str);
+        if(false === $this->PDOStatement)
+            throw new Exception($this->error());
+        $result = $this->PDOStatement->execute();
         if($result === false){
             throw new Exception($this->error());
         }else{
-            $this->numRows = $result;
+            $this->numRows = $this->PDOStatement->rowCount();
             $this->lastInsertId=$this->linkID->lastInsertId();
             return $this->numRows;
         }
@@ -131,6 +134,8 @@ class DbPdo implements DbInterface
         //释放前次的查询结果
         if ( $this->PDOStatement ) {    $this->free();    }
         $this->PDOStatement = $this->linkID->prepare($str);
+        if(false === $this->PDOStatement)
+            throw new Exception($this->error());
         $result = $this->PDOStatement->execute();
         //执行SQL失败
         if ($result === false) {
@@ -245,9 +250,14 @@ class DbPdo implements DbInterface
      */
     public function error()
     {
-        $this->error = '[' . $this->linkID->errorCode() . ']' . $this->linkID->errorInfo()[2];
-        if($this->queryStr!=''){
-            $this->error .= "\n [ SQL语句 ] : ".$this->queryStr."\n";
+        if($this->PDOStatement) {
+            $error = $this->PDOStatement->errorInfo();
+            $this->error = $error[1].':'.$error[2];
+        }else{
+            $this->error = '';
+        }
+        if('' != $this->queryStr){
+            $this->error .= "\n [ SQL语句 ] : ".$this->queryStr;
         }
         return $this->error;
     }
