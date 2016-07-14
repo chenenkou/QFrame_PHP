@@ -35,7 +35,8 @@ class DbPdo implements DbInterface
      * DbPdo constructor.
      * @param string $config
      */
-    public function __construct($config=''){
+    public function __construct($config='')
+    {
         if ( !class_exists('PDO') ) {
             die('not suppert : PDO');
         }
@@ -49,6 +50,15 @@ class DbPdo implements DbInterface
      * 取得数据库类实例
      * @static
      * @access public
+     * @return mixed 返回数据库驱动类
+     */
+
+    /**
+     * 取得数据库类实例
+     * @static
+     * @access public
+     * @param int $k 标示ID
+     * @param string $db_config 数据库配置
      * @return mixed 返回数据库驱动类
      */
     public static function getInstance($k=0, $db_config='')
