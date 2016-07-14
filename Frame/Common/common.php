@@ -118,11 +118,25 @@ function D($connection='') {
     preg_match($reg, $connection, $arr);
     $k = $arr[0];
     $config = C($connection);
-    if ( extension_loaded('mysqli') )
-        return DbMysqli::getInstance($k, $config);
-    if ( class_exists("PDO") )
-        return DbPdo::getInstance($k, $config);
-    return Db::getInstance($k, $config);
+    // 根据连接类型连接数据库
+    $connectType = isset($config['connect_type']) ? strtolower($config['connect_type']) : '';
+    switch ($connectType) {
+        case 'mysqli':
+            return DbMysqli::getInstance($k, $config);
+            break;
+        case 'pdo':
+            return DbPdo::getInstance($k, $config);
+            break;
+        case 'mysql':
+            return Db::getInstance($k, $config);
+            break;
+        default :
+            if ( extension_loaded('mysqli') )
+                return DbMysqli::getInstance($k, $config);
+            if ( class_exists("PDO") )
+                return DbPdo::getInstance($k, $config);
+            return Db::getInstance($k, $config);
+    }
 }
 
 /**

@@ -7,8 +7,6 @@ class DbMysqli implements DbInterface
 {
     // 连接池
     private static $_instance   = array();
-    // 是否使用永久连接
-    protected $pconnect         = false;
     // 当前SQL指令
     protected $queryStr         = '';
     // 最后插入ID
@@ -42,6 +40,7 @@ class DbMysqli implements DbInterface
         if ( !extension_loaded('mysqli') ) {
             die('not suppert : mysqli');
         }
+        $this->config   =  $config;
         // 设置表前缀
         if (!isset($this->config['table_prefix'])) $this->config['table_prefix'] = '';
         $this->tablePrefix = $this->config['table_prefix'];
@@ -66,7 +65,6 @@ class DbMysqli implements DbInterface
     /**
      * 连接数据库方法
      * @access public
-     * @throws ThinkExecption
      */
     public function connect() {
         if ( $this->connected )
@@ -79,7 +77,7 @@ class DbMysqli implements DbInterface
                 $config['db_user'],
                 $config['db_pwd'],
                 $config['db_name'],
-                $config['db_port'] ? intval($config['db_port']) : 3306
+                isset($config['db_port']) ? intval($config['db_port']) : 3306
             );
             if (mysqli_connect_errno()) throw new Exception(mysqli_connect_error());
             $dbVersion = $this->linkID->server_version;
@@ -302,7 +300,7 @@ class DbMysqli implements DbInterface
     /**
      * 关闭数据库
      * @access public
-     * @return volid
+     * @return void
      */
     public function close()
     {
