@@ -155,6 +155,8 @@ class DbMysqli implements DbInterface
     public function find($str)
     {
         $res = $this->query($str);
+        if (empty($res))
+            return array();
         return array_shift($res);
     }
 
@@ -168,6 +170,8 @@ class DbMysqli implements DbInterface
     public function count($str)
     {
         $res = $this->find($str);
+        if (empty($res))
+            return 0;
         return array_shift($res);
     }
 

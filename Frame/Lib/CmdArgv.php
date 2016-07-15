@@ -90,7 +90,7 @@ class CmdArgv {
         // 检测控制器是否存在
         $controllerFile = CORE_PATH . 'Command/' . $controller . 'Command.php';
         if (!file_exists($controllerFile)) {
-            die("Controller not found \n");
+            die("Command not found \n");
         }
         require_once($controllerFile);
 
