@@ -7,6 +7,6 @@ class SimpleHtmlDom {
         if (!defined('MAX_FILE_SIZE') && !empty($maxFileSize)) {
             define('MAX_FILE_SIZE', $maxFileSize);
         }
-        require_once(LIB_PATH . "/Util/SimpleHtmlDom/simple_html_dom.php");
+        require_once(LIB_PATH . "/Util/simple_html_dom/simple_html_dom.php");
     }
 }
