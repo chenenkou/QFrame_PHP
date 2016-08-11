@@ -256,9 +256,9 @@ function array_sort($arr, $keys, $type = 'desc')
 
 /**
  * 两个二维数组合并
- * @param array $a      主数组
- * @param array $b      次数组
- * @param string $k     相同的下标键值
+ * @param array $a 主数组
+ * @param array $b 次数组
+ * @param string $k 相同的下标键值
  * @param bool $replace 是否替换
  * @param string $new_k 否替换新键值
  * @return array
@@ -307,9 +307,9 @@ function array_merge_combine($arr1, $arr2)
 
 /**
  * 二维数组中的两个值替换
- * @param  array $array  需要处理的数组
- * @param  string $k1    键名1
- * @param  string $k2    键名2
+ * @param  array $array 需要处理的数组
+ * @param  string $k1 键名1
+ * @param  string $k2 键名2
  * @param  bool $replace 是否删除旧键名的值
  * @return array $arr    新数组
  */
@@ -332,7 +332,7 @@ function array_value_replace(&$array, $k1, $k2, $replace = true)
 
 /**
  * 将二维数组中外层下标替换为内层的某个数值重建数组
- * @param array $arr     需要转换的二维数组
+ * @param array $arr 需要转换的二维数组
  * @param string $minKey 内层数组中用来作为副本的下标
  * @return array
  */
@@ -343,6 +343,39 @@ function array_rebuild_by_key($arr, $minKey)
         $newArr[$v[$minKey]] = $v;
     }
     return $newArr;
+}
+
+/**
+ * 自定义二维数组去重复
+ * @param array $arr1 数组1
+ * @param array $arr2 数组2
+ * @return array       新数组
+ */
+function array_diff_u($arr1, $arr2)
+{
+    foreach ($arr2 as $k => $v) {
+        if ($arr1[$k] == $v) {
+            unset($arr1[$k]);
+        }
+    }
+    return $arr1;
+}
+
+/**
+ * 清除一个数组中指定下标的值
+ * @param array $arr 指定数组
+ * @param string $key 指定下标名称
+ * @return array
+ */
+function array_remove_key($arr, $key)
+{
+    foreach ($arr as $k => $v) {
+        if ($k == $key) {
+            unset($arr[$k]);
+            break;
+        }
+    }
+    return $arr;
 }
 
 ?>
