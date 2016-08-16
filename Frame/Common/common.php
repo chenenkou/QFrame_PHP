@@ -8,7 +8,8 @@
  * @param $subject
  * @param $search_replace
  */
-function macroReplace(&$subject, $search_replace) {
+function macroReplace(&$subject, $search_replace)
+{
     foreach ($search_replace as $search => $replace) {
         $subject = str_replace($search, $replace, $subject);
     }
@@ -22,7 +23,8 @@ function macroReplace(&$subject, $search_replace) {
  * @param string $filePath 文件存放目录
  * @param int $fileSize 文件大小
  */
-function cont2file($fileName, $content, $fileExt, $filePath, $fileSize = 4194304 ) {
+function cont2file($fileName, $content, $fileExt, $filePath, $fileSize = 4194304)
+{
     static $n = 0;
 
     $basePath = CORE_PATH;
@@ -44,7 +46,7 @@ function cont2file($fileName, $content, $fileExt, $filePath, $fileSize = 4194304
         }
     }
 
-    file_put_contents($path, $content."\n", FILE_APPEND);
+    file_put_contents($path, $content . "\n", FILE_APPEND);
 }
 
 /**
@@ -52,7 +54,8 @@ function cont2file($fileName, $content, $fileExt, $filePath, $fileSize = 4194304
  * @param $fileName log文件名
  * @param $content log内容
  */
-function L($fileName, $content) {
+function L($fileName, $content)
+{
     cont2file($fileName, $content, 'log', 'Log');
 }
 
@@ -63,12 +66,13 @@ function L($fileName, $content) {
  * @param bool $c 更改配置文件
  * @return mixed
  */
-function C($name=null, $value=null, $c = false) {
+function C($name = null, $value = null, $c = false)
+{
     static $_config = array();
-    if(empty($_config)) {
-        $confPath = CORE_PATH.'Conf/';
+    if (empty($_config)) {
+        $confPath = CORE_PATH . 'Conf/';
         $_config = array_change_key_case(F('config', '', 1, $confPath));
-        if ( file_exists( $confPath . 'debug.php') ) {
+        if (file_exists($confPath . 'debug.php')) {
             $_mainConfig = array_change_key_case(F('C_debug', '', 1, $confPath));
             $_config = array_merge($_config, $_mainConfig);
         }
@@ -84,21 +88,21 @@ function C($name=null, $value=null, $c = false) {
             if (is_null($value))
                 return isset($_config[$name]) ? $_config[$name] : null;
             $_config[$name] = $value;
-            if($c) {
+            if ($c) {
                 $_config = array_change_key_case($_config, CASE_UPPER);
-                F('config', $_config, CORE_PATH.'Conf/');
+                F('config', $_config, CORE_PATH . 'Conf/');
             }
             return true;
         }
         // 二维数组设置和获取支持
         $name = explode('.', $name);
-        $name[0]   =  strtolower($name[0]);
+        $name[0] = strtolower($name[0]);
         if (is_null($value))
             return isset($_config[$name[0]][$name[1]]) ? $_config[$name[0]][$name[1]] : null;
         $_config[$name[0]][$name[1]] = $value;
-        if($c) {
+        if ($c) {
             $_config = array_change_key_case($_config, CASE_UPPER);
-            F('config', $_config, 1, CORE_PATH.'Conf/');
+            F('config', $_config, 1, CORE_PATH . 'Conf/');
         }
         return true;
     }
@@ -110,8 +114,9 @@ function C($name=null, $value=null, $c = false) {
  * @param $string $connection 数据库连接信息 默认DB_CONFIG0
  * @return Model
  */
-function D($connection='') {
-    if(empty($connection)) {
+function D($connection = '')
+{
+    if (empty($connection)) {
         $connection = 'DB_CONFIG0';
     }
     $reg = "/\d+$/";
@@ -131,9 +136,9 @@ function D($connection='') {
             return Db::getInstance($k, $config);
             break;
         default :
-            if ( extension_loaded('mysqli') )
+            if (extension_loaded('mysqli'))
                 return DbMysqli::getInstance($k, $config);
-            if ( class_exists("PDO") )
+            if (class_exists("PDO"))
                 return DbPdo::getInstance($k, $config);
             return Db::getInstance($k, $config);
     }
@@ -147,21 +152,22 @@ function D($connection='') {
  * @param string $path 缓存路径
  * @return array|bool|int|mixed|string
  */
-function F($name, $value='',$zip=true, $path=DATA_PATH) {
-    static $_cache  = array();
-    $filename       = $path . $name . '.php';
+function F($name, $value = '', $zip = true, $path = DATA_PATH)
+{
+    static $_cache = array();
+    $filename = $path . $name . '.php';
     if ('' !== $value) {
         if (is_null($value)) {
             // 删除缓存
-            return false !== strpos($name,'*')?array_map("unlink", glob($filename)):unlink($filename);
+            return false !== strpos($name, '*') ? array_map("unlink", glob($filename)) : unlink($filename);
         } else {
             // 缓存数据
-            $dir            =   dirname($filename);
+            $dir = dirname($filename);
             // 目录不存在则创建
             if (!is_dir($dir))
-                mkdir($dir,0755,true);
-            $_cache[$name]  =   $value;
-            if($zip) {
+                mkdir($dir, 0755, true);
+            $_cache[$name] = $value;
+            if ($zip) {
                 return file_put_contents($filename, "<?php\treturn " . var_export($value, true) . ";?>");
             } else {
                 return file_put_contents($filename, strip_whitespace("<?php\treturn " . var_export($value, true) . ";?>"));
@@ -172,10 +178,10 @@ function F($name, $value='',$zip=true, $path=DATA_PATH) {
         return $_cache[$name];
     // 获取缓存数据
     if (is_file($filename)) {
-        $value          =   include $filename;
-        $_cache[$name]  =   $value;
+        $value = include $filename;
+        $_cache[$name] = $value;
     } else {
-        $value          =   false;
+        $value = false;
     }
     return $value;
 }
@@ -186,7 +192,8 @@ function F($name, $value='',$zip=true, $path=DATA_PATH) {
  * @param $name 表名称
  * @return mixed
  */
-function M($name) {
+function M($name)
+{
     static $_model = array();
     if (!isset($_model[$name])) {
         require_once(CORE_PATH . 'Model/' . $name . '.php');
@@ -198,10 +205,11 @@ function M($name) {
 /**
  * 终端脚本运行时打印输出
  * @param string $str 输出的内容
- * @param string $m   相关附加内容
+ * @param string $m 相关附加内容
  */
-function printout($str, $m = '') {
-    switch($m) {
+function printout($str, $m = '')
+{
+    switch ($m) {
         case 's':
             $m = "处理成功";
             break;
@@ -212,8 +220,8 @@ function printout($str, $m = '') {
             $m = '';
             break;
     }
-    $str = $str.$m;
-    echo $str."\n";
+    $str = $str . $m;
+    echo $str . "\n";
     fpc($str);
 }
 
@@ -222,11 +230,12 @@ function printout($str, $m = '') {
  * @param $arr where条件数组
  * @return string
  */
-function whereArr2Str($arr) {
+function whereArr2Str($arr)
+{
     $tmp = array();
     $tmp[] = '1 = 1';
-    foreach ($arr as $k=>$v) {
-        $tmp[] = $k .' = '. $v;
+    foreach ($arr as $k => $v) {
+        $tmp[] = $k . ' = ' . $v;
     }
     return implode(' AND ', $tmp);
 }
@@ -236,12 +245,13 @@ function whereArr2Str($arr) {
  * @param $data
  * @return array
  */
-function arr2InsertSql($data) {
+function arr2InsertSql($data)
+{
     $arr = array(
         'fields' => array(),
         'values' => array(),
     );
-    foreach ($data as $k=>$v) {
+    foreach ($data as $k => $v) {
         $v = addslashes($v);
 
         $arr['fields'][] = "`{$k}`";
@@ -257,10 +267,11 @@ function arr2InsertSql($data) {
  * @param $data
  * @return array
  */
-function doubleArr2InsertSql($data) {
+function doubleArr2InsertSql($data)
+{
     $fields = array();
     $values = array();
-    foreach($data as $item) {
+    foreach ($data as $item) {
         list($field, $value) = arr2InsertSql($item);
         if (empty($fields)) $fields = $field;
         $values[] = $value;
@@ -274,19 +285,20 @@ function doubleArr2InsertSql($data) {
  * @param $data
  * @return array
  */
-function arr2UpdateSql($data) {
+function arr2UpdateSql($data)
+{
     $arr = array(
         'data' => array(),
         'where' => array(),
     );
-    foreach ($data['data'] as $k=>$v) {
+    foreach ($data['data'] as $k => $v) {
         $arr['data'][] = "{$k} = '{$v}'";
     }
 
     if (!isset($data['where']) || empty($data['where'])) {
         $arr['where'] = "1=1";
     } else {
-        foreach ($data['where'] as $k=>$v) {
+        foreach ($data['where'] as $k => $v) {
             $arr['where'][] = "{$k} = '{$v}'";
         }
     }
@@ -299,7 +311,8 @@ function arr2UpdateSql($data) {
  * 判断是否是命令行执行
  * @return bool
  */
-function is_shell() {
+function is_shell()
+{
     if (!isset($_SERVER['SHELL'])) {
         return false;
     }
@@ -309,7 +322,8 @@ function is_shell() {
 /**
  * 抛出404
  */
-function throw_404() {
+function throw_404()
+{
     @header("http/1.1 404 not found");
     @header("status: 404 not found");
     echo '<center><h1>404 Not Found</h1></center><hr />';
@@ -322,7 +336,8 @@ function throw_404() {
  * @param null $url url地址
  * @return mixed|string 移除GET变量后的URL地址
  */
-function remove_url_param($var, $url = null) {
+function remove_url_param($var, $url = null)
+{
     if (is_null($url))
         $url = App::i()->request->uri;
     $url = $url . '&';
@@ -336,7 +351,8 @@ function remove_url_param($var, $url = null) {
  * @param null $uri
  * @return mixed|null|string
  */
-function replace_url_param($param, $uri = null) {
+function replace_url_param($param, $uri = null)
+{
     $paramArr = explode('=', $param);
     $uri = remove_url_param($paramArr[0], $uri);
     $separator = "&";
@@ -351,6 +367,32 @@ function replace_url_param($param, $uri = null) {
  * @param $str
  * @return string
  */
-function hump2underline($str) {
+function hump2underline($str)
+{
     return strtolower(preg_replace('/((?<=[a-z])(?=[A-Z]))/', '_', $str));
+}
+
+/**
+ * 导入所需的类库
+ * @param string $class 类库命名空间字符串[例如:Component.Test]
+ * @return bool
+ */
+function import($class)
+{
+    static $_file = array();
+    $baseUrl = CORE_PATH;
+    $ext = '.php';
+
+    $class = str_replace(array('.'), array('/'), $class);
+    if (isset($_file[$class]))
+        return true;
+    else
+        $_file[$class] = true;
+
+    $classFile = $baseUrl . $class . $ext;
+    if (!class_exists(basename($class),false)) {
+        // 如果类不存在 则导入类库文件
+        return require_once($classFile);
+    }
+    return null;
 }
