@@ -68,8 +68,8 @@ function C($name=null, $value=null, $c = false) {
     if(empty($_config)) {
         $confPath = CORE_PATH.'Conf/';
         $_config = array_change_key_case(F('config', '', 1, $confPath));
-        if ( file_exists( $confPath . 'main.php') ) {
-            $_mainConfig = array_change_key_case(F('main', '', 1, $confPath));
+        if ( file_exists( $confPath . 'debug.php') ) {
+            $_mainConfig = array_change_key_case(F('C_debug', '', 1, $confPath));
             $_config = array_merge($_config, $_mainConfig);
         }
     }
