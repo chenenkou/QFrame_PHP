@@ -51,8 +51,8 @@ function cont2file($fileName, $content, $fileExt, $filePath, $fileSize = 4194304
 
 /**
  * log信息
- * @param $fileName log文件名
- * @param $content log内容
+ * @param string $fileName log文件名
+ * @param array $content log内容
  */
 function L($fileName, $content)
 {
@@ -72,9 +72,13 @@ function C($name = null, $value = null, $c = false)
     if (empty($_config)) {
         $confPath = CORE_PATH . 'Conf/';
         $_config = array_change_key_case(F('config', '', 1, $confPath));
-        if (file_exists($confPath . 'debug.php')) {
-            $_mainConfig = array_change_key_case(F('C_debug', '', 1, $confPath));
-            $_config = array_merge($_config, $_mainConfig);
+
+        $confExtKeys = array('main', 'debug');
+        foreach ($confExtKeys as $confExtKey) {
+            if (file_exists($confPath . "{$confExtKey}.php")) {
+                $_mainConfig = array_change_key_case(F($confExtKey, '', 1, $confPath));
+                $_config = array_merge($_config, $_mainConfig);
+            }
         }
     }
     // 无参数时获取所有
@@ -111,7 +115,7 @@ function C($name = null, $value = null, $c = false)
 
 /**
  * D函数用于实例化数据库连接对象
- * @param $string $connection 数据库连接信息 默认DB_CONFIG0
+ * @param string $connection 数据库连接信息 默认DB_CONFIG0
  * @return Model
  */
 function D($connection = '')
@@ -189,7 +193,7 @@ function F($name, $value = '', $zip = true, $path = DATA_PATH)
 /**
  * 实例化一个模型文件
  * 即表文件名
- * @param $name 表名称
+ * @param string $name 表名称
  * @return mixed
  */
 function M($name)
@@ -227,7 +231,7 @@ function printout($str, $m = '')
 
 /**
  * 配合SQL中where处理
- * @param $arr where条件数组
+ * @param array $arr where条件数组
  * @return string
  */
 function whereArr2Str($arr)
@@ -242,7 +246,7 @@ function whereArr2Str($arr)
 
 /**
  * 数组转变成插入语句中的字符
- * @param $data
+ * @param array $data
  * @return array
  */
 function arr2InsertSql($data)
@@ -292,14 +296,16 @@ function arr2UpdateSql($data)
         'where' => array(),
     );
     foreach ($data['data'] as $k => $v) {
-        $arr['data'][] = "{$k} = '{$v}'";
+        $v = addslashes($v);
+        $arr['data'][] = "`{$k}` = '{$v}'";
     }
 
     if (!isset($data['where']) || empty($data['where'])) {
         $arr['where'] = "1=1";
     } else {
         foreach ($data['where'] as $k => $v) {
-            $arr['where'][] = "{$k} = '{$v}'";
+            $v = addslashes($v);
+            $arr['where'][] = "`{$k}` = '{$v}'";
         }
     }
     $arr['data'] = implode(', ', $arr['data']);
@@ -347,7 +353,7 @@ function remove_url_param($var, $url = null)
 
 /**
  * 替换URL中的指定GET变量
- * @param $param 要替换的GET变量
+ * @param string $param 要替换的GET变量
  * @param null $uri
  * @return mixed|null|string
  */
@@ -370,29 +376,4 @@ function replace_url_param($param, $uri = null)
 function hump2underline($str)
 {
     return strtolower(preg_replace('/((?<=[a-z])(?=[A-Z]))/', '_', $str));
-}
-
-/**
- * 导入所需的类库
- * @param string $class 类库命名空间字符串[例如:Component.Test]
- * @return bool
- */
-function import($class)
-{
-    static $_file = array();
-    $baseUrl = CORE_PATH;
-    $ext = '.php';
-
-    $class = str_replace(array('.'), array('/'), $class);
-    if (isset($_file[$class]))
-        return true;
-    else
-        $_file[$class] = true;
-
-    $classFile = $baseUrl . $class . $ext;
-    if (!class_exists(basename($class),false)) {
-        // 如果类不存在 则导入类库文件
-        return require_once($classFile);
-    }
-    return null;
 }
