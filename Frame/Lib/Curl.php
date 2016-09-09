@@ -293,11 +293,12 @@ class Curl {
     public function post_m( $url, $params, $cookie = '' )
     {
         $curl = curl_init($url);
+        $curl_version = curl_version();
         curl_setopt($curl, CURLOPT_HEADER, 0);
         // 对认证证书来源的检查，0表示阻止对证书的合法性的检查。
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
         // 从证书中检查SSL加密算法是否存在
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 1);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, ($curl_version['version'] >= '7.28.1') ? 2 : 1);
         //模拟用户使用的浏览器，在HTTP请求中包含一个”user-agent”头的字符串。
         curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
         //发送一个常规的POST请求，类型为：application/x-www-form-urlencoded，就像表单提交的一样。
