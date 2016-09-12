@@ -1,10 +1,12 @@
 <?php
+
 /**
  * 使用CURL 作为核心操作的HTTP访问类
  *
  * @desc CURL 以稳定、高效、移植性强作为很重要的HTTP协议访问客户端，必须在PHP中安装 CURL 扩展才能使用本功能
  */
-class Curl {
+class Curl
+{
     /**
      * @var object 对象单例
      */
@@ -30,39 +32,46 @@ class Curl {
      * @var array 302跳转后的url信息
      */
     private $curlInfo = array();
+
     /**
      * 构造函数
-     *
-     * @param string $configFile 配置文件路径
+     * Curl constructor.
+     * @param string $url URL地址
      */
-    private function __construct($url) {
+    private function __construct($url)
+    {
         $this->uri = $url;
     }
+
     /**
      * 保证对象不被clone
      */
-    private function __clone() {
+    private function __clone()
+    {
     }
+
     /**
      * 获取对象唯一实例
-     *
-     * @param string $configFile 配置文件路径
+     * @param string $url URL地址
      * @return object 返回本对象实例
      */
-    public static function getInstance($url = '') {
+    public static function getInstance($url = '')
+    {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self($url);
         }
         return self::$_instance;
     }
+
     /**
      * 设置需要发送的HTTP头信息
      *
-     * @param array/string 需要设置的头信息，可以是一个 类似 array('Host: example.com', 'Accept-Language: zh-cn') 的头信息数组
+     * @param array /string 需要设置的头信息，可以是一个 类似 array('Host: example.com', 'Accept-Language: zh-cn') 的头信息数组
      *       或单一的一条类似于 'Host: example.com' 头信息字符串
      * @return void
      */
-    public function setHeader($header) {
+    public function setHeader($header)
+    {
         if (empty($header)) {
             return;
         }
@@ -74,100 +83,112 @@ class Curl {
             $this->header[] = $header;
         }
     }
+
     /**
      * 设置Cookie头信息
      *
      * 注意：本函数只能调用一次，下次调用会覆盖上一次的设置
      *
-     * @param string/array 需要设置的Cookie信息，一个类似于 'name1=value1&name2=value2' 的Cookie字符串信息，
+     * @param string /array 需要设置的Cookie信息，一个类似于 'name1=value1&name2=value2' 的Cookie字符串信息，
      *         或者是一个 array('name1'=>'value1', 'name2'=>'value2') 的一维数组
      * @return void
      */
-    public function setCookie($cookie) {
+    public function setCookie($cookie)
+    {
         if (empty($cookie)) {
             return;
         }
         if (is_array($cookie)) {
-            $this->cookies = Http::makeQuery($cookie, '; ');
+            $this->cookies = self::makeQuery($cookie, '; ');
         } elseif (is_string($cookie)) {
             $this->cookies = $cookie;
         }
     }
+
     /**
      * 设置要发送的数据信息
      *
      * 注意：本函数只能调用一次，下次调用会覆盖上一次的设置
      *
-     * @param array 设置需要发送的数据信息，一个类似于 array('name1'=>'value1', 'name2'=>'value2') 的一维数组
+     * @param array $vars 设置需要发送的数据信息，一个类似于 array('name1'=>'value1', 'name2'=>'value2') 的一维数组
      * @return void
      */
-    public function setVar($vars) {
+    public function setVar($vars)
+    {
         if (empty($vars)) {
             return;
         }
         $this->vars = $vars;
     }
+
     /**
      * 设置要请求的URL地址
      *
      * @param string $url 需要设置的URL地址
      * @return void
      */
-    public function setUrl($url) {
+    public function setUrl($url)
+    {
         if ($url != '') {
             $this->uri = $url;
         }
     }
+
     /**
      * 发送HTTP GET请求
      *
      * @param string $url 如果初始化对象的时候没有设置或者要设置不同的访问URL，可以传本参数
      * @param array $vars 需要单独返送的GET变量
-     * @param array/string 需要设置的头信息，可以是一个 类似 array('Host: example.com', 'Accept-Language: zh-cn') 的头信息数组
+     * @param array /string 需要设置的头信息，可以是一个 类似 array('Host: example.com', 'Accept-Language: zh-cn') 的头信息数组
      *         或单一的一条类似于 'Host: example.com' 头信息字符串
-     * @param string/array 需要设置的Cookie信息，一个类似于 'name1=value1&name2=value2' 的Cookie字符串信息，
+     * @param string /array 需要设置的Cookie信息，一个类似于 'name1=value1&name2=value2' 的Cookie字符串信息，
      *         或者是一个 array('name1'=>'value1', 'name2'=>'value2') 的一维数组
      * @param int $timeout 连接对方服务器访问超时时间，单位为秒
      * @param array $options 当前操作类一些特殊的属性设置
-     * @return unknown
+     * @return mixed
      */
-    public function get($url = '', $vars = array(), $header = array(), $cookie = '', $timeout = 5, $options = array()) {
+    public function get($url = '', $vars = array(), $header = array(), $cookie = '', $timeout = 5, $options = array())
+    {
         $this->setUrl($url);
         $this->setHeader($header);
         $this->setCookie($cookie);
         $this->setVar($vars);
         return $this->send('GET', $timeout);
     }
+
     /**
      * 发送HTTP POST请求
      *
      * @param string $url 如果初始化对象的时候没有设置或者要设置不同的访问URL，可以传本参数
      * @param array $vars 需要单独返送的GET变量
-     * @param array/string 需要设置的头信息，可以是一个 类似 array('Host: example.com', 'Accept-Language: zh-cn') 的头信息数组
+     * @param array /string 需要设置的头信息，可以是一个 类似 array('Host: example.com', 'Accept-Language: zh-cn') 的头信息数组
      *         或单一的一条类似于 'Host: example.com' 头信息字符串
-     * @param string/array 需要设置的Cookie信息，一个类似于 'name1=value1&name2=value2' 的Cookie字符串信息，
+     * @param string /array 需要设置的Cookie信息，一个类似于 'name1=value1&name2=value2' 的Cookie字符串信息，
      *         或者是一个 array('name1'=>'value1', 'name2'=>'value2') 的一维数组
      * @param int $timeout 连接对方服务器访问超时时间，单位为秒
      * @param array $options 当前操作类一些特殊的属性设置
-     * @return unknown
+     * @return mixed
      */
-    public function post($url = '', $vars = array(), $header = array(), $cookie = '', $timeout = 5, $options = array()) {
+    public function post($url = '', $vars = array(), $header = array(), $cookie = '', $timeout = 5, $options = array())
+    {
         $this->setUrl($url);
         $this->setHeader($header);
         $this->setCookie($cookie);
         $this->setVar($vars);
         return $this->send('POST', $timeout);
     }
+
     /**
      * 发送HTTP请求核心函数
      *
      * @param string $method 使用GET还是POST方式访问
-     * @param array $vars 需要另外附加发送的GET/POST数据
      * @param int $timeout 连接对方服务器访问超时时间，单位为秒
      * @param array $options 当前操作类一些特殊的属性设置
-     * @return string 返回服务器端读取的返回数据
+     * @return mixed
+     * @throws Exception
      */
-    public function send($method = 'GET', $timeout = 5, $options = array()) {
+    public function send($method = 'GET', $timeout = 5, $options = array())
+    {
         //处理参数是否为空
         if ($this->uri == '') {
             throw new Exception(__CLASS__ . ": Access url is empty");
@@ -184,7 +205,7 @@ class Curl {
         }
         //处理GET请求参数
         if ($method == 'GET' && !empty($this->vars)) {
-            $query = Http::makeQuery($this->vars);
+            $query = self::makeQuery($this->vars);
             $parse = parse_url($this->uri);
             $sep = isset($parse['query']) ? '&' : '?';
             $this->uri .= $sep . $query;
@@ -227,8 +248,26 @@ class Curl {
      * 获取跳转后的url信息
      * @return array
      */
-    public function getCurlInfo() {
+    public function getCurlInfo()
+    {
         return $this->curlInfo;
+    }
+
+    /**
+     * 生成一个供Cookie或HTTP GET Query的字符串
+     *
+     * @param array $data 需要生产的数据数组，必须是 Name => Value 结构
+     * @param string $sep 两个变量值之间分割的字符，缺省是 &
+     * @return string 返回生成好的Cookie查询字符串
+     */
+    public static function makeQuery($data, $sep = '&')
+    {
+        $encoded = '';
+        while (list($k, $v) = each($data)) {
+            $encoded .= ($encoded ? "$sep" : "");
+            $encoded .= rawurlencode($k) . "=" . rawurlencode($v);
+        }
+        return $encoded;
     }
 
     /**
@@ -240,12 +279,13 @@ class Curl {
      * 所以需要加上cookie
      * @return void
      */
-    public function reutersload($remote, $local, $cookie= '') {
+    public function reutersload($remote, $local, $cookie = '')
+    {
         $cp = curl_init($remote);
-        $fp = fopen($local,"w");
+        $fp = fopen($local, "w");
         curl_setopt($cp, CURLOPT_FILE, $fp);
         curl_setopt($cp, CURLOPT_HEADER, 0);
-        if($cookie != '') {
+        if ($cookie != '') {
             curl_setopt($cp, CURLOPT_COOKIEFILE, $cookie);
         }
         curl_exec($cp);
@@ -254,13 +294,24 @@ class Curl {
     }
 
     /**
+     * 远程下载 - reutersload 别名
+     * @param string $remote 远程文件名
+     * @param string $local 本地保存文件名
+     * @param string $cookie
+     */
+    public function curlDownload($remote, $local, $cookie = '')
+    {
+        $this->reutersload($remote, $local, $cookie);
+    }
+
+    /**
      * get 方式获取访问指定地址
-     * @param string url 要访问的地址
-     * @param string cookie cookie的存放地址,没有则不发送cookie
+     * @param string $url 要访问的地址
+     * @param string $cookie cookie的存放地址,没有则不发送cookie
      * @return string curl_exec()获取的信息
      * @author andy
      */
-    public function get_m( $url, $cookie='' )
+    public function get_m($url, $cookie = '')
     {
         // 初始化一个cURL会话
         $curl = curl_init($url);
@@ -270,7 +321,7 @@ class Curl {
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         // 使用自动跳转
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-        if(!empty($cookie)) {
+        if (!empty($cookie)) {
             // 包含cookie数据的文件名，cookie文件的格式可以是Netscape格式，或者只是纯HTTP头部信息存入文件。
             curl_setopt($curl, CURLOPT_COOKIEFILE, $cookie);
         }
@@ -285,25 +336,25 @@ class Curl {
 
     /**
      * get 方式获取访问指定地址
-     * @param string url 要访问的地址
-     * @param string cookie cookie的存放地址,没有则不发送cookie
+     * @param string $url 要访问的地址
+     * @param string $cookie cookie的存放地址,没有则不发送cookie
      * @return string curl_exec()获取的信息
      * @author andy
      */
-    public function methodGET( $url, $cookie='' )
+    public function methodGET($url, $cookie = '')
     {
         return $this->get_m($url, $cookie);
     }
 
     /**
      * post 方式模拟请求指定地址
-     * @param string url 请求的指定地址
-     * @param array params 请求所带的
-     * #patam string cookie cookie存放地址
+     * @param string $url 请求的指定地址
+     * @param array $params 请求所带的
+     * @patam string cookie cookie存放地址
      * @return string curl_exec()获取的信息
      * @author andy
      */
-    public function post_m( $url, $params, $cookie = '' )
+    public function post_m($url, $params, $cookie = '')
     {
         $curl = curl_init($url);
         $curl_version = curl_version();
@@ -341,14 +392,14 @@ class Curl {
 
     /**
      * post 方式模拟请求指定地址
-     * @param string url 请求的指定地址
-     * @param array params 请求所带的
-     * #patam string cookie cookie存放地址
+     * @param string $url 请求的指定地址
+     * @param array $params 请求所带的
+     * @patam string cookie cookie存放地址
      * @return string curl_exec()获取的信息
      * @author andy
      */
-    public function methodPOST( $url, $params, $cookie = '')
+    public function methodPOST($url, $params, $cookie = '')
     {
-        return $this->post_m( $url, $params, $cookie );
+        return $this->post_m($url, $params, $cookie);
     }
 }
