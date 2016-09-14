@@ -34,6 +34,16 @@ class Curl
     private $curlInfo = array();
 
     /**
+     * @var string htpasswd账号信息
+     */
+    private $userPwd = '';
+
+    /**
+     * @var string 用户代理
+     */
+    private $httpUserAgent = 'Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36';
+
+    /**
      * 构造函数
      * Curl constructor.
      * @param string $url URL地址
@@ -305,6 +315,15 @@ class Curl
     }
 
     /**
+     * 设置htpasswd账号信息
+     * @param string $userPwd htpasswd账号信息
+     */
+    public function setUserPwd($userPwd = '')
+    {
+        $this->userPwd = $userPwd;
+    }
+
+    /**
      * get 方式获取访问指定地址
      * @param string $url 要访问的地址
      * @param string $cookie cookie的存放地址,没有则不发送cookie
@@ -315,10 +334,14 @@ class Curl
     {
         // 初始化一个cURL会话
         $curl = curl_init($url);
+        //模拟用户使用的浏览器，在HTTP请求中包含一个”user-agent”头的字符串。
+        curl_setopt($curl, CURLOPT_USERAGENT, empty($_SERVER['HTTP_USER_AGENT']) ? $this->httpUserAgent : $_SERVER['HTTP_USER_AGENT'] );
         // 不显示header信息
         curl_setopt($curl, CURLOPT_HEADER, 0);
         // 将 curl_exec()获取的信息以文件流的形式返回，而不是直接输出。
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        // 使用htpasswd账号信息
+        if ($this->userPwd) curl_setopt($curl, CURLOPT_USERPWD, $this->userPwd);
         // 使用自动跳转
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
         if (!empty($cookie)) {
@@ -328,10 +351,12 @@ class Curl
         // 自动设置Referer
         curl_setopt($curl, CURLOPT_AUTOREFERER, 1);
         // 执行一个curl会话
-        $tmp = curl_exec($curl);
+        $result = curl_exec($curl);
+        // 服务器返回的状态
+        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         // 关闭curl会话
         curl_close($curl);
-        return $tmp;
+        return ($httpCode === 200) ? $result : false;
     }
 
     /**
@@ -350,7 +375,7 @@ class Curl
      * post 方式模拟请求指定地址
      * @param string $url 请求的指定地址
      * @param array $params 请求所带的
-     * @patam string cookie cookie存放地址
+     * @param string $cookie cookie存放地址
      * @return string curl_exec()获取的信息
      * @author andy
      */
@@ -364,11 +389,13 @@ class Curl
         // 从证书中检查SSL加密算法是否存在
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, ($curl_version['version'] >= '7.28.1') ? 2 : 1);
         //模拟用户使用的浏览器，在HTTP请求中包含一个”user-agent”头的字符串。
-        curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+        curl_setopt($curl, CURLOPT_USERAGENT, empty($_SERVER['HTTP_USER_AGENT']) ? $this->httpUserAgent : $_SERVER['HTTP_USER_AGENT'] );
         //发送一个常规的POST请求，类型为：application/x-www-form-urlencoded，就像表单提交的一样。
         curl_setopt($curl, CURLOPT_POST, 1);
         // 将 curl_exec()获取的信息以文件流的形式返回，而不是直接输出。
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        // 使用htpasswd账号信息
+        if ($this->userPwd) curl_setopt($curl, CURLOPT_USERPWD, $this->userPwd);
         // 使用自动跳转
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
         // 自动设置Referer
@@ -384,17 +411,19 @@ class Curl
         } else {
             curl_setopt($curl, CURLOPT_POSTFIELDS, $params);
         }
-
+        // 执行一个curl会话
         $result = curl_exec($curl);
-        curl_close($curl);
-        return $result;
+        // 服务器返回的状态
+        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        // 关闭curl会话
+        return ($httpCode === 200) ? $result : false;
     }
 
     /**
      * post 方式模拟请求指定地址
      * @param string $url 请求的指定地址
      * @param array $params 请求所带的
-     * @patam string cookie cookie存放地址
+     * @param string $cookie cookie存放地址
      * @return string curl_exec()获取的信息
      * @author andy
      */
