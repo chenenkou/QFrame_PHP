@@ -10,9 +10,17 @@
  */
 function macroReplace(&$subject, $search_replace)
 {
-    foreach ($search_replace as $search => $replace) {
+    /*foreach ($search_replace as $search => $replace) {
         $subject = str_replace($search, $replace, $subject);
+    }*/
+
+    $patterns = array();
+    $replacements = array();
+    foreach ($search_replace as $search => $replace) {
+        $patterns[] = '/'.$search.'/';
+        $replacements[] = $replace;
     }
+    $subject = preg_replace($patterns, $replacements, $subject);
 }
 
 /**
@@ -42,7 +50,7 @@ function cont2file($fileName, $content, $fileExt, $filePath, $fileSize = 4194304
         //echo $fSize . "\n";
         if ($fSize >= $fileSize) {
             $n++;
-            $path = preg_replace('/\_i\d/', "_i{$n}", $path);
+            $path = preg_replace('/\_i\d+/', "_i{$n}", $path);
         }
     }
 
