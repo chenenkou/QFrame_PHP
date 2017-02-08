@@ -174,7 +174,7 @@ function redirect($url, $time = 0, $msg = '', $continueCode = false)
 
 /**
  * 发送邮件
- * @param $body 邮件内容
+ * @param string $body 邮件内容
  * @param string $subject 邮件主题
  */
 function sendMail($body, $subject = '第三方激活回调错误报警')
@@ -186,8 +186,8 @@ function sendMail($body, $subject = '第三方激活回调错误报警')
 
 /**
  * 简单异戒加密
- * @param $info 需要加密的字符串
- * @param $key 加密的key
+ * @param string $info 需要加密的字符串
+ * @param string $key 加密的key
  * @return string
  */
 function simpleXor($info, $key)
@@ -213,6 +213,10 @@ function offClient()
     flush();
 }
 
+////////////////////////////////////////////////////////////////
+//  数组函数库
+////////////////////////////////////////////////////////////////
+
 /**
  * 删除数组中的指定的key
  * @param $arr
@@ -224,10 +228,6 @@ function unset_keys(&$arr, $keys)
         unset($arr[$v]);
     }
 }
-
-////////////////////////////////////////////////////////////////
-//  数组函数库
-////////////////////////////////////////////////////////////////
 
 /**
  * 排序数组
@@ -378,6 +378,10 @@ function array_remove_key($arr, $key)
     return $arr;
 }
 
+////////////////////////////////////////////////////////////////
+//  文件函数库
+////////////////////////////////////////////////////////////////
+
 /**
  * 读取本地文件提供下载
  * @param $file string 本地文件名
@@ -398,6 +402,46 @@ function read_file_down($file)
         readfile($file);
         exit;
     }
+}
+
+////////////////////////////////////////////////////////////////
+//  时间函数库
+////////////////////////////////////////////////////////////////
+
+/**
+ * 获取日初和末的时间戳
+ * @param $time int
+ * @return array
+ */
+function get_day_time($time = 0)
+{
+    if (empty($time))
+        $t = time();
+    else
+        $t = $time;
+
+    $start = mktime(0,0,0,date("m",$t),date("d",$t),date("Y",$t));
+    $end = mktime(23,59,59,date("m",$t),date("d",$t),date("Y",$t));
+
+    return array($start, $end);
+}
+
+/**
+ * 获取月初和末的时间戳
+ * @param $time int
+ * @return array
+ */
+function get_month_time($time = 0)
+{
+    if (empty($time))
+        $t = time();
+    else
+        $t = $time;
+
+    $start = strtotime(date('Y-m', $t));
+    $end = strtotime(date('Y-m-t', $t)) + 86400 - 1;
+
+    return array($start, $end);
 }
 
 ?>
