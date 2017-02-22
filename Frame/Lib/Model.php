@@ -48,7 +48,7 @@ class Model
      */
     public function tableName()
     {
-        return $this->_db->getTablePrefix() . hump2underline(get_class($this));
+        return $this->_db->getTablePrefix() .  preg_replace('/_model$/', '', hump2underline(get_class($this)));
     }
 
     /**
