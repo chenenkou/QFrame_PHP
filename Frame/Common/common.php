@@ -298,13 +298,12 @@ function doubleArr2InsertSql($data)
  * @param $data
  * @return array
  */
-function arr2UpdateSql($data)
-{
+function arr2UpdateSql($data) {
     $arr = array(
         'data' => array(),
         'where' => array(),
     );
-    foreach ($data['data'] as $k => $v) {
+    foreach ($data['data'] as $k=>$v) {
         $v = addslashes($v);
         $arr['data'][] = "`{$k}` = '{$v}'";
     }
@@ -312,10 +311,15 @@ function arr2UpdateSql($data)
     if (!isset($data['where']) || empty($data['where'])) {
         $arr['where'] = "1=1";
     } else {
-        foreach ($data['where'] as $k => $v) {
-            $v = addslashes($v);
-            $arr['where'][] = "`{$k}` = '{$v}'";
+        if (is_string($data['where'])) {
+            $arr['where'][] = $data['where'];
+        } elseif(is_array($data['where'])) {
+            foreach ($data['where'] as $k=>$v) {
+                $v = addslashes($v);
+                $arr['where'][] = "`{$k}` = '{$v}'";
+            }
         }
+
     }
     $arr['data'] = implode(', ', $arr['data']);
     $arr['where'] = implode(' AND ', $arr['where']);

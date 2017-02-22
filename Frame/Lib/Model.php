@@ -201,4 +201,17 @@ class Model
         $sql = "INSERT INTO {$table} ({$fields}) VALUES {$values}";
         return $this->execute($sql);
     }
+
+    /**
+     * 更新数据
+     * @param array $data 更新的数据
+     * @param array $where 更新的条件
+     * @return int
+     */
+    public function update($data, $where = array())
+    {
+        $arr = arr2UpdateSql(array('data' => $data, 'where' => $where));
+        $sql = "UPDATE `__TABLE__` SET {$arr['data']} WHERE {$arr['where']}";
+        return $this->execute($sql);
+    }
 }
