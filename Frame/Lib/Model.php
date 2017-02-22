@@ -11,7 +11,7 @@ class Model
     protected $_db;
     // 数据库配置 - 子类可以修改该属性切换数据库
     protected $db_config = 'DB_CONFIG0';
-    // 模型对应表名 - 子类可以修改该属性标记正确的表名
+    // 模型对应表名
     protected $table_name = null;
 
     /**
@@ -48,18 +48,31 @@ class Model
      */
     public function tableName()
     {
-        return $this->table_name ? $this->table_name : $this->_db->getTablePrefix() . hump2underline(get_class($this));
+        return $this->_db->getTablePrefix() . hump2underline(get_class($this));
+    }
+
+    /**
+     * 解析SQL语句
+     * @access public
+     * @param string $sql SQL指令
+     * @return string
+     */
+    protected function parseSql($sql)
+    {
+        $sql = strtr($sql, array('__TABLE__' => $this->tableName()));
+        return $sql;
     }
 
     /**
      * 执行查询 主要针对 SELECT, SHOW 等指令
      * 返回数据集
      * @access public
-     * @param string $str sql指令
+     * @param string $sql sql指令
      * @return mixed
      */
     public function query($sql)
     {
+        $sql = $this->parseSql($sql);
         return $this->_db->query($sql);
     }
 
@@ -72,6 +85,7 @@ class Model
      */
     public function find($sql)
     {
+        $sql = $this->parseSql($sql);
         return $this->_db->find($sql);
     }
 
@@ -84,6 +98,7 @@ class Model
      */
     public function count($sql)
     {
+        $sql = $this->parseSql($sql);
         return $this->_db->count($sql);
     }
 
@@ -102,15 +117,16 @@ class Model
     /**
      * 执行语句 针对 INSERT, UPDATE 以及DELETE
      * @access public
-     * @param string $sql sql指令
+     * @param string $str sql指令
      * @return integer
      */
     public function execute($sql)
     {
+        $sql = $this->parseSql($sql);
         $result = $this->_db->execute($sql);
         if (!(stripos($sql, 'INSERT') === false)) {
             if ($result > 0) {
-                $result = $this->getLastInsID();
+                $result = $this->getLastInsID() || $result;
             }
         }
         return $result;
@@ -119,7 +135,6 @@ class Model
     /**
      * 启动事务
      * @access public
-     * @return void
      */
     public function startTrans()
     {
@@ -129,7 +144,6 @@ class Model
     /**
      * 用于非自动提交状态下面的查询提交
      * @access public
-     * @return bool
      */
     public function commit()
     {
@@ -139,7 +153,6 @@ class Model
     /**
      * 事务回滚
      * @access public
-     * @return bool
      */
     public function rollback()
     {
@@ -167,12 +180,12 @@ class Model
     }
 
     /**
-     * 新增数据前的处理
-     * @param array $data 需要处理的数据
+     * 保存数据
+     * @param array $data 需要保存的数据
      * @param string $table 表名
-     * @return array
+     * @return int
      */
-    private function _addData($data, $table = '')
+    public function insert($data, $table = '')
     {
         // 判断是单条数据还是多条数据
         if (is_array(end($data))) {
@@ -185,34 +198,7 @@ class Model
         if (empty($table))
             $table = $this->tableName();
 
-        return array($table, $fields, $values);
-    }
-
-    /**
-     * 保存数据
-     * @param array $data 需要保存的数据
-     * @param string $table 表名
-     * @return int
-     */
-    public function insert($data, $table = '')
-    {
-        list($table, $fields, $values) = $this->_addData($data, $table);
-
         $sql = "INSERT INTO {$table} ({$fields}) VALUES {$values}";
-        return $this->execute($sql);
-    }
-
-    /**
-     * 替换数据
-     * @param array $data 需要保存的数据
-     * @param string $table 表名
-     * @return int
-     */
-    public function replace($data, $table = '')
-    {
-        list($table, $fields, $values) = $this->_addData($data, $table);
-
-        $sql = "REPLACE INTO {$table} ({$fields}) VALUES {$values}";
         return $this->execute($sql);
     }
 }
