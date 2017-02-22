@@ -207,6 +207,7 @@ function F($name, $value = '', $zip = true, $path = DATA_PATH)
 function M($name)
 {
     static $_model = array();
+    $name = "{$name}Model";
     if (!isset($_model[$name])) {
         require_once(CORE_PATH . 'Model/' . $name . '.php');
         $_model[$name] = new $name;

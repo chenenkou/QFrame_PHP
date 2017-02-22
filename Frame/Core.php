@@ -1,5 +1,5 @@
 <?php
-    define('Q_VERSION', '3.16.0816'); // 版本号
+    define('Q_VERSION', '3.17.0222'); // 版本号
     defined('ROOT') or define('ROOT', dirname(dirname(__FILE__)) . '/'); // 根目录常量设置检测
     defined('FOLDER_NAME') or define('FOLDER_NAME', 'Frame'); // 框架文件夹名称
     defined('IS_PHP_CLI') or define('IS_PHP_CLI', false);

@@ -8,5 +8,6 @@ class TestCommand extends Command
 {
     public function execute($name = 'TestCommand') {
         pL($name);
+        Log::write($name);
     }
 }

@@ -3,7 +3,7 @@
 /**
  * 测试表数据模型
  */
-class Test extends Model
+class TestModel extends Model
 {
     /**
      * 模型对象的表名
