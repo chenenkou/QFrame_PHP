@@ -31,17 +31,32 @@ class Mail {
         if (empty($config)) { $config = C('MAIL_CONFIG'); }
 
         $this->mail->Host = $config['host'];   // SMTP servers
+        if (isset($config['port']) && !empty($config['port'])) // port
+            $this->mail->Port = $config['port'];
+        if (isset($config['smtpSecure']) && !empty($config['smtpSecure'])) // smtpSecure
+            $this->mail->SMTPSecure = $config['smtpSecure'];
         $this->mail->Username = $config['username'];     // SMTP username  注意：普通邮件认证不需要加 @域名
         $this->mail->Password = $config['password']; // SMTP password
         $this->mail->From = $config['username'];      // 发件人邮箱
         $this->mail->FromName =  $config['fromname'] ? $config['fromname'] : $config['username'];  // 发件人
     }
 
+
+    /**
+     * 返回错误信息
+     * @return string
+     */
+    public function getError()
+    {
+        return $this->mail->ErrorInfo;
+    }
+
     /**
      * 使用smtp发送邮件
-     * @param $sendToEmail 发送的邮箱
-     * @param $subject 邮件主题
-     * @param $body 邮件内容
+     * @param string $sendToEmail 发送的邮箱
+     * @param string $subject 邮件主题
+     * @param string $body 邮件内容
+     * @return bool
      */
     public function sendSmtpMail($sendToEmail, $subject, $body) {
         $this->mail->IsSMTP();                  // send via SMTP
@@ -59,10 +74,15 @@ class Mail {
         // 邮件内容
         $this->mail->Body = $body;
         $this->mail->AltBody ="text/html";
-        if(!$this->mail->Send()) {
+        /*if(!$this->mail->Send()) {
             exit("邮件发送有误, 邮件错误信息: " . $this->mail->ErrorInfo);
         } else {
             echo "{$sendToEmail} 邮件发送成功!<br />";
+        }*/
+        if(!$this->mail->Send()) {
+            return false;
+        } else {
+            return true;
         }
     }
 }
