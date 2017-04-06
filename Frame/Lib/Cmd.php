@@ -33,8 +33,13 @@ class Cmd {
      * 应用初始化执行
      */
     public function run($argv) {
-        if (strtolower(php_sapi_name()) != 'cli')
-            die("Must be on the command line");
+        $sapiType = strtolower(php_sapi_name());
+        if ($sapiType != 'cli') {
+            if (preg_match('/cgi/', $sapiType))
+                throw_404();
+            else
+                die("Must be on the command line Not " . $sapiType);
+        }
         array_shift($argv);
         $this->request->parseArgv($argv);
     }
@@ -156,6 +161,9 @@ class CmdArgv {
             }
             $paramValues[] = $params[$v->name];
         }
+
+        defined('CONTROLLER_NAME') 	or define('CONTROLLER_NAME',$controllerClassName);
+        defined('ACTION_NAME') 	or define('ACTION_NAME',$action);
 
         call_user_func_array(array(new $controllerClassName, $action),  $paramValues);
     }
