@@ -391,7 +391,7 @@ function read_file_down($file)
     if (file_exists($file)) {
         header('Content-Description: File Transfer');
         header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename='.basename($file));
+        header('Content-Disposition: attachment; filename=' . basename($file));
         header('Content-Transfer-Encoding: binary');
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
@@ -420,8 +420,8 @@ function get_day_time($time = 0)
     else
         $t = $time;
 
-    $start = mktime(0,0,0,date("m",$t),date("d",$t),date("Y",$t));
-    $end = mktime(23,59,59,date("m",$t),date("d",$t),date("Y",$t));
+    $start = mktime(0, 0, 0, date("m", $t), date("d", $t), date("Y", $t));
+    $end = mktime(23, 59, 59, date("m", $t), date("d", $t), date("Y", $t));
 
     return array($start, $end);
 }
@@ -443,5 +443,98 @@ function get_month_time($time = 0)
 
     return array($start, $end);
 }
+
+/**
+ * 模板截取字符串
+ * @param $str
+ * @param int $start
+ * @param $length
+ * @param string $charset
+ * @param bool $suffix
+ * @return string
+ */
+function msubstr($str, $start = 0, $length, $charset = "utf-8", $suffix = true)
+{
+    if (function_exists("mb_substr")) {
+        if ($suffix)
+            return mb_substr($str, $start, $length, $charset) . "...";
+        else
+            return mb_substr($str, $start, $length, $charset);
+    } elseif (function_exists('iconv_substr')) {
+        if ($suffix)
+            return iconv_substr($str, $start, $length, $charset) . "...";
+        else
+            return iconv_substr($str, $start, $length, $charset);
+    }
+    $re['utf-8'] = "/[x01-x7f]|[xc2-xdf][x80-xbf]|[xe0-xef]
+                  [x80-xbf]{2}|[xf0-xff][x80-xbf]{3}/";
+    $re['gb2312'] = "/[x01-x7f]|[xb0-xf7][xa0-xfe]/";
+    $re['gbk'] = "/[x01-x7f]|[x81-xfe][x40-xfe]/";
+    $re['big5'] = "/[x01-x7f]|[x81-xfe]([x40-x7e]|xa1-xfe])/";
+    preg_match_all($re[$charset], $str, $match);
+    $slice = join("", array_slice($match[0], $start, $length));
+    if ($suffix) return $slice . "…";
+    return $slice;
+}
+
+/**
+ * windows下cmd中调试数据
+ * @param array $data 数据
+ */
+function cmdDebug($data)
+{
+    echo iconv('UTF-8', 'GBK', print_r($data, true)) . "\n";
+    exit();
+}
+
+/**
+ * 修改二维数组为value值为$key的数组
+ * @param array $arr 数组
+ * @param string $key 指定二维中的$key为value
+ * @return array
+ */
+function change_array_dimension($arr, $key)
+{
+    $new_arr = array();
+    foreach ($arr as $k => $item) {
+        $new_arr[$k] = $item[$key];
+    }
+    return $new_arr;
+}
+
+/**
+ * 数组下标根据子数组下标值重建
+ * @param array $arr 二维数组
+ * @param string $field 子数组下标名
+ * @return array 新二维数组
+ */
+function array_key_rebuild_field($arr, $field = 'id')
+{
+    $newArr = array();
+    if (empty($arr))
+        return $newArr;
+    foreach ($arr as $item) {
+        if (!isset($item[$field]))
+            continue;
+        $newArr[$item[$field]] = $item;
+    }
+
+    return $newArr;
+}
+
+/**
+ * object 转 array
+ */
+function object_to_array($obj)
+{
+    $arr = array();
+    $_arr = is_object($obj) ? get_object_vars($obj) : $obj;
+    foreach ($_arr as $key => $val) {
+        $val = (is_array($val)) || is_object($val) ? object_to_array($val) : $val;
+        $arr[$key] = $val;
+    }
+    return $arr;
+}
+
 
 ?>
